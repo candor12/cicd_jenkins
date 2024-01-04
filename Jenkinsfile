@@ -1,11 +1,17 @@
 pipeline {
     
-	agent any
-/*	
-	tools {
-        maven "maven3"
+    agent any
+
+    tools {
+        maven "MAVEN3"		
+	jdk "OracleJDK11"
     }
-*/	
+    parameters {
+        //string(name:'goal',defaultValue:'mvn clean install -DskipTests',description:'Maven Build Goal')
+	    choice(choices: ["mvn clean install -DskipTests", "mvn clean install"], name: "goal", description: "Build with or without tests")
+	    //booleanParam(name: "choose", defaultValue: false, description: "")
+    }
+	
     environment {
         NEXUS_VERSION = "nexus3"
         NEXUS_PROTOCOL = "http"
@@ -18,9 +24,10 @@ pipeline {
 	
     stages{
         
-        stage('BUILD'){
+        stage('Maven Build'){
             steps {
-                sh 'mvn clean install -DskipTests'
+                sh "${params.goal}"
+               // sh 'mvn clean install -DskipTests=true'
             }
             post {
                 success {
@@ -29,20 +36,8 @@ pipeline {
                 }
             }
         }
-
-	stage('UNIT TEST'){
-            steps {
-                sh 'mvn test'
-            }
-        }
-
-	stage('INTEGRATION TEST'){
-            steps {
-                sh 'mvn verify -DskipUnitTests'
-            }
-        }
 		
-        stage ('CODE ANALYSIS WITH CHECKSTYLE'){
+        stage ('Checkstyle Analysis'){
             steps {
                 sh 'mvn checkstyle:checkstyle'
             }
@@ -53,16 +48,16 @@ pipeline {
             }
         }
 
-        stage('CODE ANALYSIS with SONARQUBE') {
+        stage('SonarQube Scan') {
           
-		  environment {
-             scannerHome = tool 'sonarscanner4'
+	  environment {
+                    scannerHome = tool 'sonar4.7'
           }
 
           steps {
-            withSonarQubeEnv('sonar-pro') {
-               sh '''${scannerHome}/bin/sonar-scanner -Dsonar.projectKey=vprofile \
-                   -Dsonar.projectName=vprofile-repo \
+            withSonarQubeEnv('sonar') {
+               sh '''${scannerHome}/bin/sonar-scanner -Dsonar.projectKey=team \
+                   -Dsonar.projectName=team-repo \
                    -Dsonar.projectVersion=1.0 \
                    -Dsonar.sources=src/ \
                    -Dsonar.java.binaries=target/test-classes/com/visualpathit/account/controllerTest/ \
@@ -77,7 +72,7 @@ pipeline {
           }
         }
 
-        stage("Publish to Nexus Repository Manager") {
+        stage("Publish Artifact to Nexus") {
             steps {
                 script {
                     pom = readMavenPom file: "pom.xml";
