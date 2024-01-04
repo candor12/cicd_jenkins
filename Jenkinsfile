@@ -9,7 +9,7 @@ pipeline {
     parameters {
         //string(name:'goal',defaultValue:'mvn clean install -DskipTests',description:'Maven Build Goal')
 	    choice(choices: ["mvn clean install -DskipTests", "mvn clean install"], name: "goal", description: "Build with or without tests")
-	    //booleanParam(name: "choose", defaultValue: false, description: "")
+	    booleanParam(name: "deploy", defaultValue: false, description: "Will this build be deployed?")
     }
 	
     environment {
