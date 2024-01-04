@@ -64,13 +64,14 @@ pipeline {
                    -Dsonar.junit.reportsPath=target/surefire-reports/ \
                    -Dsonar.jacoco.reportsPath=target/jacoco.exec \
                    -Dsonar.java.checkstyle.reportPaths=target/checkstyle-result.xml'''
-            }
 
-           // timeout(time: 5, unit: 'MINUTES') {
+            timeout(time: 8, unit: 'MINUTES') {
            //    waitForQualityGate abortPipeline: true
-           // }
+		  waitForQualityGate(webhookSecretId: 'sqreport') 
+           }
           }
         }
+	}
 
         stage("Publish Artifact to Nexus") {
             steps {
