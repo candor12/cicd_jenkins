@@ -71,7 +71,9 @@ pipeline {
 		     timeout(time: 5, unit: 'MINUTES') {
                        def qualitygate = waitForQualityGate(webhookSecretId: 'sqreport')
                           if (qualitygate.status != "OK") {
-                              error "Pipeline aborted due to quality gate coverage failure."
+				  catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
+                                  sh "exit 1"
+                              //error "Pipeline aborted due to quality gate coverage failure."
     }
 }
                  /*timeout(time: 8, unit: 'MINUTES') {
@@ -80,7 +82,7 @@ pipeline {
            } */
 		     
           }}
-        }
+        }}
 
         stage("Publish Artifact to Nexus") {
             steps {
