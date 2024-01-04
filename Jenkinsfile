@@ -64,14 +64,23 @@ pipeline {
                    -Dsonar.junit.reportsPath=target/surefire-reports/ \
                    -Dsonar.jacoco.reportsPath=target/jacoco.exec \
                    -Dsonar.java.checkstyle.reportPaths=target/checkstyle-result.xml'''
-
-            timeout(time: 8, unit: 'MINUTES') {
-           //    waitForQualityGate abortPipeline: true
-		  waitForQualityGate(webhookSecretId: 'sqreport') abortPipeline
-           }
-          }
-        }
-	}
+        stage("Quality Gate"){
+	   steps{
+	     script{
+		     timeout(time: 5, unit: 'MINUTES') {
+                       def qualitygate = waitForQualityGate(webhookSecretId: 'sqreport')
+                          if (qualitygate.status != "OK") {
+                              error "Pipeline aborted due to quality gate coverage failure."
+    }
+}
+                 /*timeout(time: 8, unit: 'MINUTES') {
+                   waitForQualityGate abortPipeline: true
+		   waitForQualityGate(webhookSecretId: 'sqreport') abortPipeline
+           } */
+		     
+          }}
+        }}
+	}}
 
         stage("Publish Artifact to Nexus") {
             steps {
