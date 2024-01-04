@@ -67,7 +67,7 @@ pipeline {
 
             timeout(time: 8, unit: 'MINUTES') {
            //    waitForQualityGate abortPipeline: true
-		  waitForQualityGate(webhookSecretId: 'sqreport') abortPipeline: true 
+		  waitForQualityGate(webhookSecretId: 'sqreport') abortPipeline
            }
           }
         }
