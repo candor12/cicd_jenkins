@@ -1,16 +1,9 @@
 pipeline {
     agent any
-
-    //tools {
-     //   maven "MAVEN3"		
-//	jdk "OracleJDK11"
-  //  }
     parameters {
-        //string(name:'goal',defaultValue:'mvn clean install -DskipTests',description:'Maven Build Goal')
-	    choice(choices: ["mvn clean install -DskipTests", "mvn clean install"], name: "goal", description: "Build with or without tests")
-	    booleanParam(name: "deploy", defaultValue: false, description: "Will this build be deployed?")
-    }
-	
+	    choice(choices: ["mvn clean install", "mvn clean install -DskipTests"], name: "goal", description: "Maven Goal")
+	    booleanParam(name: "deploy", defaultValue: false, description: "Deploy the build:")
+    }	
     environment {
         NEXUS_VERSION = "nexus3"
         NEXUS_PROTOCOL = "http"	    
@@ -25,12 +18,14 @@ pipeline {
         
         stage('Maven Build'){
             steps {
+		echo "Stage: Maven Build"
                 sh "${params.goal}"
                // sh 'mvn clean install -DskipTests=true'
             }
         }	
         stage ('Checkstyle Analysis'){
             steps {
+		echo "Stage: Checkstyle Analysis"
                 sh 'mvn checkstyle:checkstyle'
             }
             post {
@@ -48,6 +43,7 @@ pipeline {
 
           steps {
             withSonarQubeEnv('sonar') {
+	       echo "Stage: SonarQube Scan"
                sh '''${scannerHome}/bin/sonar-scanner -Dsonar.projectKey=team \
                    -Dsonar.projectName=team-repo \
                    -Dsonar.projectVersion=1.0 \
@@ -56,24 +52,29 @@ pipeline {
                    -Dsonar.junit.reportsPath=target/surefire-reports/ \
                    -Dsonar.jacoco.reportsPath=target/jacoco.exec \
                    -Dsonar.java.checkstyle.reportPaths=target/checkstyle-result.xml'''
-	    }}}
-        stage("Quality Gate"){
+	    }
+	  }
+	}
+        stage("SonarQube Quality Gate"){
 	   steps{
 	     script{
+		     echo "Stage: SonarQube Quality Gate"
 		     timeout(time: 5, unit: 'MINUTES') {
                        def qualitygate = waitForQualityGate(webhookSecretId: 'sqreport')
                           if (qualitygate.status != "OK") {
 				  catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
-                                  sh "exit 1"
-                              //error "Pipeline aborted due to quality gate coverage failure."
-    }
-}	     
-          }}
-        }}
+                                     sh "exit 1"
+				  }
+			  }
+		     }
+	     }
+	   }
+	}
 
         stage("Publish Artifact to Nexus") {
             steps {
                 script {
+		    echo "Stage: Publish Artifact to Nexus"
                     pom = readMavenPom file: "pom.xml";
                     filesByGlob = findFiles(glob: "target/*.${pom.packaging}");
                     echo "${filesByGlob[0].name} ${filesByGlob[0].path} ${filesByGlob[0].directory} ${filesByGlob[0].length} ${filesByGlob[0].lastModified}"
@@ -114,6 +115,7 @@ pipeline {
                 }
             }
 		steps{
+			echo "Stage: Fetch from Nexus & Deploy using Ansible"
 			echo "${params.deploy}"
             }
         }
