@@ -1,11 +1,10 @@
 pipeline {
-    
     agent any
 
-    tools {
-        maven "MAVEN3"		
-	jdk "OracleJDK11"
-    }
+    //tools {
+     //   maven "MAVEN3"		
+//	jdk "OracleJDK11"
+  //  }
     parameters {
         //string(name:'goal',defaultValue:'mvn clean install -DskipTests',description:'Maven Build Goal')
 	    choice(choices: ["mvn clean install -DskipTests", "mvn clean install"], name: "goal", description: "Build with or without tests")
@@ -123,6 +122,15 @@ pipeline {
 
 
     }
-
-
-}
+	stage("Fetch from Nexus & Deploy using Ansible")
+		{
+                 when {
+                   expression {
+                       return params.deploy   // will be executed only when expression evaluates to true
+                }
+            }
+		steps{
+			echo "${params.deploy}"
+            }
+        }
+    }
