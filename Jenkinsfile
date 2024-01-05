@@ -28,14 +28,7 @@ pipeline {
                 sh "${params.goal}"
                // sh 'mvn clean install -DskipTests=true'
             }
-            post {
-                success {
-                    echo 'Now Archiving...'
-                    archiveArtifacts artifacts: '**/target/*.war'
-                }
-            }
-        }
-		
+        }	
         stage ('Checkstyle Analysis'){
             steps {
                 sh 'mvn checkstyle:checkstyle'
@@ -74,12 +67,7 @@ pipeline {
                                   sh "exit 1"
                               //error "Pipeline aborted due to quality gate coverage failure."
     }
-}
-                 /*timeout(time: 8, unit: 'MINUTES') {
-                   waitForQualityGate abortPipeline: true
-		   waitForQualityGate(webhookSecretId: 'sqreport') abortPipeline
-           } */
-		     
+}	     
           }}
         }}
 
@@ -119,11 +107,7 @@ pipeline {
                 }
             }
         }
-
-
-    }
-	stage("Fetch from Nexus & Deploy using Ansible")
-		{
+	stage("Fetch from Nexus & Deploy using Ansible"){
                  when {
                    expression {
                        return params.deploy   // will be executed only when expression evaluates to true
@@ -134,3 +118,4 @@ pipeline {
             }
         }
     }
+}
