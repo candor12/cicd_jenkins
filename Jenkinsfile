@@ -78,7 +78,7 @@ pipeline {
 	     script{
 		     echo "Stage: SonarQube Quality Gate"
 		     timeout(time: 5, unit: 'MINUTES') {
-                       def qualitygate = waitForQualityGate(webhookSecretId: 'sqreport')
+                       def qualitygate = waitForQualityGate(webhookSecretId: 'sqwebhook')
                           if (qualitygate.status != "OK") {
 				  catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
                                      sh "exit 1"
