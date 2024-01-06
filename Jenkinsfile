@@ -1,7 +1,7 @@
 pipeline {
     agent any
     parameters {
-	    choice(choices: ["mvn clean install", "mvn clean install -DskipTests"], name: "goal", description: "Maven Goal")
+	    //choice(choices: ["mvn clean install", "mvn clean install -DskipTests"], name: "goal", description: "Maven Goal")
 	    booleanParam(name: "deploy", defaultValue: false, description: "Deploy the build:")
     }	
     environment {
@@ -16,13 +16,31 @@ pipeline {
 	
     stages{
         
-        stage('Maven Build'){
+        /*stage('Maven Build'){
             steps {
 		echo "Stage: Maven Build"
                 sh "${params.goal}"
                // sh 'mvn clean install -DskipTests=true'
             }
-        }	
+        }
+	*/
+	stage('Maven Build'){
+            steps {
+                sh 'mvn clean install -DskipTests'
+            }
+        }
+
+	stage('UNIT TEST'){
+            steps {
+                sh 'mvn test'
+            }
+        }
+
+	stage('INTEGRATION TEST'){
+            steps {
+                sh 'mvn verify -DskipUnitTests'
+            }
+        }    
         stage ('Checkstyle Analysis'){
             steps {
 		echo "Stage: Checkstyle Analysis"
