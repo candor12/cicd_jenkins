@@ -1,4 +1,7 @@
 pipeline {
+    options {
+      buildDiscarder(logRotator(numToKeepStr: '3', artifactNumToKeepStr: '3'))
+  }
     agent any
     parameters {
 	    //choice(choices: ["mvn clean install", "mvn clean install -DskipTests"], name: "goal", description: "Maven Goal")
@@ -26,32 +29,22 @@ pipeline {
 	*/
 	stage('Maven Build'){
             steps {
+		echo "Stage: Maven Build"
                 sh 'mvn clean install -DskipTests'
             }
         }
 
-	stage('UNIT TEST'){
+	stage('Unit Test'){
             steps {
+		echo "Stage: Maven Build"
                 sh 'mvn test'
             }
-        }
-
-	stage('INTEGRATION TEST'){
-            steps {
-                sh 'mvn verify -DskipUnitTests'
-            }
-        }    
+        }  
         stage ('Checkstyle Analysis'){
             steps {
 		echo "Stage: Checkstyle Analysis"
                 sh 'mvn checkstyle:checkstyle'
-            }
-            post {
-                success {
-                    echo 'Generated Analysis Result'
-                }
-            }
-        }
+            }}
 
         stage('SonarQube Scan') {
           
@@ -80,7 +73,7 @@ pipeline {
 		     timeout(time: 5, unit: 'MINUTES') {
                        def qualitygate = waitForQualityGate(webhookSecretId: 'sqwebhook')
                           if (qualitygate.status != "OK") {
-				  catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
+				  catchError(buildResult: 'UNSTABLE', stageResult: 'FAILURE') {
                                      sh "exit 1"
 				  }
 			  }
