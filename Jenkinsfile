@@ -62,8 +62,8 @@ pipeline {
           steps {
             withSonarQubeEnv('sonar') {
 	       echo "Stage: SonarQube Scan"
-               sh '''${scannerHome}/bin/sonar-scanner -Dsonar.projectKey=team \
-                   -Dsonar.projectName=team-repo \
+               sh '''${scannerHome}/bin/sonar-scanner -Dsonar.projectKey=jenkins \
+                   -Dsonar.projectName=tjenkins \
                    -Dsonar.projectVersion=1.0 \
                    -Dsonar.sources=src/ \
                    -Dsonar.java.binaries=target/test-classes/com/visualpathit/account/controllerTest/ \
