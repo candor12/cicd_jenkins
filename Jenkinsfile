@@ -15,7 +15,7 @@ pipeline {
         NEXUS_REPOSITORY = "team-artifacts"
 	NEXUS_REPO_ID    = "team-artifacts"
         NEXUS_CREDENTIAL_ID = "nexuslogin"
-        ARTVERSION = "${BUILD_ID}"
+        ARTVERSION = "${env.BUILD_ID}"
 	ecr_repo = '674583976178.dkr.ecr.us-east-2.amazonaws.com/teamimagerepo'
         ecrCreds = 'awscreds'
         image = ''
@@ -48,9 +48,10 @@ pipeline {
 
         stage('SonarQube Scan') {
 	  when {
+		  not{
                    expression {
                        return params.SonarQube  
-                }
+                }}
             }
           environment {
                     scannerHome = tool 'sonar4.7'
