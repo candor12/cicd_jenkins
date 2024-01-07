@@ -151,6 +151,7 @@ pipeline {
     }   
 }	    
 	stage("Fetch from Nexus & Deploy using Ansible"){
+		 agent { label agent1 }
                  when {
                    expression {
                        return params.deploy   // will be executed only when expression evaluates to true
