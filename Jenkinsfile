@@ -5,7 +5,7 @@ pipeline {
     agent any
     parameters {
 	    //choice(choices: ["mvn clean install", "mvn clean install -DskipTests"], name: "goal", description: "Maven Goal")
-	    booleanParam(name: "deploy", defaultValue: false, description: "Deploy the build:")
+	    booleanParam(name: "deploy", defaultValue: false, description: "Deploy the Build")
 	    booleanParam(name: "SonarQube", defaultValue: false, description: "ByPass SonarQube Scan")
     }	
     environment {
@@ -95,7 +95,6 @@ pipeline {
         stage("Publish Artifact to Nexus") {
             steps {
                 script {
-		    echo "Stage: Publish Artifact to Nexus"
                     pom = readMavenPom file: "pom.xml";
                     filesByGlob = findFiles(glob: "target/*.${pom.packaging}");
                     echo "${filesByGlob[0].name} ${filesByGlob[0].path} ${filesByGlob[0].directory} ${filesByGlob[0].length} ${filesByGlob[0].lastModified}"
