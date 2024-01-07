@@ -145,6 +145,7 @@ pipeline {
         }
       }
     }
+	    
 	stage("Fetch from Nexus & Deploy using Ansible"){
                  when {
                    expression {
@@ -157,4 +158,9 @@ pipeline {
             }
         }
     }
+	post {
+          always {
+            cleanWs()
+        }
+    }   
 }
