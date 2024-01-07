@@ -15,18 +15,12 @@ pipeline {
 	NEXUS_REPO_ID    = "team-artifacts"
         NEXUS_CREDENTIAL_ID = "nexuslogin"
         ARTVERSION = "${BUILD_ID}-${BUILD_TIMESTAMP}"
+	ecr_repo = '674583976178.dkr.ecr.us-east-2.amazonaws.com/teamimagerepo'
+        ecrCreds = 'awscreds'
+        image = ''
     }
 	
     stages{
-        
-        /*stage('Maven Build'){
-            steps {
-		echo "Stage: Maven Build"
-                sh "${params.goal}"
-               // sh 'mvn clean install -DskipTests=true'
-            }
-        }
-	*/
 	stage('Maven Build'){
             steps {
 		echo "Stage: Maven Build"
@@ -36,7 +30,7 @@ pipeline {
 
 	stage('Unit Test'){
             steps {
-		echo "Stage: Maven Build"
+		echo "Stage: Maven Test"
                 sh 'mvn test'
             }
         }  
@@ -119,6 +113,23 @@ pipeline {
                 }
             }
         }
+	stage('Dockerfile Build') {
+          steps {
+             script {
+                image = docker.build(ecr_repo + ":$BUILD_ID", "./")
+        }
+      }
+    }
+        stage('Push Image to AWS ECR'){
+           steps {
+              script {
+                 docker.withRegistry("https://" + ecr_repo, "ecr:us-east-2:" + ecrCreds) {
+                   image.push("$BUILD_ID")
+                   image.push('latest')
+          }
+        }
+      }
+    }
 	stage("Fetch from Nexus & Deploy using Ansible"){
                  when {
                    expression {
