@@ -24,7 +24,7 @@ pipeline {
     stages{
 	stage('Clone Source Code'){
          steps {
-           git branch: 'master', url: 'https://github.com/azka-begh/test.git'
+           git branch: 'master', url: 'https://github.com/azka-begh/Jenkins.git'
       }
     }
 	stage('Maven Build'){
