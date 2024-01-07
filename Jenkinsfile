@@ -21,6 +21,11 @@ pipeline {
     }
 	
     stages{
+	stage('Clone Source Code'){
+         steps {
+           git branch: 'test', url: 'https://github.com/azka-begh/test.git'
+      }
+    }
 	stage('Maven Build'){
             steps {
 		echo "Stage: Maven Build"
@@ -45,7 +50,6 @@ pipeline {
 	  environment {
                     scannerHome = tool 'sonar4.7'
           }
-
           steps {
             withSonarQubeEnv('sonar') {
 	       echo "Stage: SonarQube Scan"
