@@ -146,7 +146,7 @@ pipeline {
       }
        post {
         always {
-            sh 'docker images prune -f'
+            sh 'docker image prune -a -f'
         }
     }   
 }	    
