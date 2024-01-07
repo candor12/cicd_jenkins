@@ -6,6 +6,7 @@ pipeline {
     parameters {
 	    //choice(choices: ["mvn clean install", "mvn clean install -DskipTests"], name: "goal", description: "Maven Goal")
 	    booleanParam(name: "deploy", defaultValue: false, description: "Deploy the build:")
+	    booleanParam(name: "SonarQube", defaultValue: false, description: "ByPass SonarQube Scan")
     }	
     environment {
         NEXUS_VERSION = "nexus3"
@@ -46,8 +47,12 @@ pipeline {
             }}
 
         stage('SonarQube Scan') {
-          
-	  environment {
+	  when {
+                   expression {
+                       return params.SonarQube  
+                }
+            }
+          environment {
                     scannerHome = tool 'sonar4.7'
           }
           steps {
