@@ -1,6 +1,7 @@
 pipeline {
     options {
       buildDiscarder(logRotator(numToKeepStr: '3', artifactNumToKeepStr: '3'))
+      skipDefaultCheckout() 
   }
     agent any
     parameters {
