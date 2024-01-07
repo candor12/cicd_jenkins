@@ -160,6 +160,8 @@ pipeline {
 		steps{
 			echo "Stage: Fetch from Nexus & Deploy using Ansible"
 			echo "${params.deploy}"
+			sh 'cd /home/ec2-user/ansible'
+			sh 'ansible-playbook --extra-vars BUILD_ID=${BUILD_ID}  ./example.yaml'
             }
         }
     }
