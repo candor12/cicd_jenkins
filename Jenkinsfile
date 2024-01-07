@@ -14,7 +14,7 @@ pipeline {
         NEXUS_REPOSITORY = "team-artifacts"
 	NEXUS_REPO_ID    = "team-artifacts"
         NEXUS_CREDENTIAL_ID = "nexuslogin"
-        ARTVERSION = "${BUILD_ID}-${BUILD_TIMESTAMP}"
+        ARTVERSION = "${BUILD_ID}"
 	ecr_repo = '674583976178.dkr.ecr.us-east-2.amazonaws.com/teamimagerepo'
         ecrCreds = 'awscreds'
         image = ''
