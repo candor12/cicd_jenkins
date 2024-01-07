@@ -145,6 +145,11 @@ pipeline {
         }
       }
     }
+       post {
+        always {
+            sh 'docker images prune -f'
+        }
+    }   
 	    
 	stage("Fetch from Nexus & Deploy using Ansible"){
                  when {
