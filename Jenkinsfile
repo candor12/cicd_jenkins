@@ -71,6 +71,12 @@ pipeline {
 	  }
 	}
         stage("SonarQube Quality Gate"){
+	    when {
+		  not{
+                   expression {
+                       return params.SonarQube  
+                }}
+            }
 	   steps{
 	     script{
 		     echo "Stage: SonarQube Quality Gate"
