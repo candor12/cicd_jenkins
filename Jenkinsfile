@@ -164,7 +164,7 @@ pipeline {
 			sh 'git clone -b Anisble-Test https://github.com/azka-begh/Jenkins.git'
 			sh 'cd Jenkins && ls -l'
 			sh 'cd ansible && ls -l'
-			sh 'ansible-playbook deployment.yml --extra-vars BUILD_ID=${BUILD_ID}'
+			sh 'ansible-playbook deployment.yml --extra-vars PASS=${NEXUS_CREDENTIAL_ID} BUILD_ID=${BUILD_ID}'
             }
 		post{
 			always{
