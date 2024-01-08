@@ -21,7 +21,7 @@ pipeline {
 	NEXUS_ARTIFACT = "${env.NEXUS_PROTOCOL}://${env.NEXUS_URL}/repository/${env.NEXUS_REPOSITORY}/com/team/project/tmart/${env.ARTVERSION}/tmart-${env.ARTVERSION}.war"
 	ecr_repo = '674583976178.dkr.ecr.us-east-2.amazonaws.com/teamimagerepo'
         ecrCreds = 'awscreds'
-	image = "${env.ecr_repo}:${env.BUILD_ID}"
+	image = '${env.ecr_repo}:${env.BUILD_ID}'
     }
 	
     stages{
