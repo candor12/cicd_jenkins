@@ -41,7 +41,8 @@ pipeline {
 			//sh 'git clone https://github.com/azka-begh/Jenkins.git && git checkout Anisble-Test'
 			//sh 'cd Jenkins && ls -l'
 			sh 'cd ansible && ls -l'
-			sh 'ansible-playbook deployment.yml --extra-vars PASS=${NEXUS_CREDENTIAL_ID} BUILD_ID=${BUILD_ID}'
+			sh 'ansible-playbook deployment.yml --extra-vars PASS=${NEXUS_CREDENTIAL_ID} BUILD_ID=${BUILD_ID} > live_log.txt'
+			sh 'tail -1 /home/ec2-user/log/ansible.log'
             }
         }
     }
