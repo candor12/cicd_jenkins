@@ -4,7 +4,7 @@ pipeline {
       //skipDefaultCheckout() 
       disableConcurrentBuilds()
   }
-    agent { label agent1 }
+    agent { label 'agent1' }
     parameters {
 	    booleanParam(name: "Deploy", defaultValue: false, description: "Deploy the Build")
 	    booleanParam(name: "SonarQube", defaultValue: false, description: "ByPass SonarQube Scan")
