@@ -1,0 +1,76 @@
+---
+- name: Nexus Deployment
+  hosts: web1
+  vars:
+    timestamp: "{{ansible_date_time.date}}-{{ansible_date_time.hour}}.{{ansible_date_time.minute}}"
+  tasks:
+    - name: Fetch Artifact from Nexus
+      get_url:
+        url: "http://team:{{PASS}}@172.31.18.80:8081/repository/team-artifacts/com/team/project/tmart/{{BUILD_ID}}/tmart-{{BUILD_ID}}.war"
+        dest: "/tmp/stagingArea"
+      register: wardeploy
+
+    - stat:
+        path: /usr/local/tomcat8/webapps/ROOT
+      register: isArtifact
+
+    - name: Stop Tomcat Service before Deployment
+      service:
+        name: tomcat
+        state: stopped
+
+    - name: Backup and Deploy Artifact
+      block:
+      - name: Archive ROOT dir with timestamp
+        archive:
+          path: /usr/local/tomcat8/webapps/ROOT
+          dest: "/opt/ROOT_{{timestamp}}.tgz"
+        when: isArtifact.stat.exists
+        register: archive_info
+
+      - name: Rename Tomcat Root Directory
+        shell: cp -r ROOT old_ROOT
+        args:
+          chdir: /usr/local/tomcat8/webapps/
+
+      - name: Cleanup the Deployment Folder
+        file:
+          path: "{{item}}"
+          state: absent
+        when: archive_info.changed
+        loop:
+         - /usr/local/tomcat8/webapps/ROOT
+         - /usr/local/tomcat8/webapps/ROOT.war
+
+      - name: Perform Deployment
+        block:
+         - name: Deploy Artifact to Server
+           copy:
+             src: "/tmp/stagingArea"
+             dest: /usr/local/tomcat8/webapps/ROOT.war
+             remote_src: yes
+           register: deploy_info
+
+        rescue:
+          - shell: cp -r old_ROOT ROOT
+            args:
+              chdir: /usr/local/tomcat8/webapps/
+
+      rescue:
+       - name: Rescue - Start Tomcat Service
+         service:
+          name: tomcat
+          state: started
+
+    - name: Show the Contents of the Deployment Folder
+      shell: ls -l
+
+    - name: Start Tomcat Service post Deployment
+      service:
+        name: tomcat
+        state: started
+      when: deploy_info.changed
+
+    - name: Check for the Artifact Contents
+      wait_for:
+        path: /usr/local/tomcat8/webapps/ROOT
