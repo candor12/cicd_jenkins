@@ -1,7 +1,7 @@
 pipeline {
     options {
       buildDiscarder(logRotator(numToKeepStr: '3', artifactNumToKeepStr: '3'))
-      skipDefaultCheckout() 
+      //skipDefaultCheckout() 
   }
     agent any
     parameters {
@@ -23,11 +23,11 @@ pipeline {
     }
 	
     stages{
-	stage('Clone Source Code'){
+	/*stage('Clone Source Code'){
          steps {
-           git branch: 'Anisble-Test', url: 'https://github.com/azka-begh/Jenkins.git'
+           git branch: 'Test-Anisble', url: 'https://github.com/azka-begh/Jenkins.git'
       }
-    }	    
+    } */	    
 	stage("Fetch from Nexus & Deploy using Ansible"){
 		 agent { label 'agent1' }
                  when {
@@ -38,7 +38,7 @@ pipeline {
 		steps{
 			echo "Stage: Fetch from Nexus & Deploy using Ansible"
 			echo "${params.deploy}"
-			sh 'git clone https://github.com/azka-begh/Jenkins.git && git checkout Anisble-Test'
+			//sh 'git clone https://github.com/azka-begh/Jenkins.git && git checkout Anisble-Test'
 			sh 'cd Jenkins && ls -l'
 			sh 'cd ansible && ls -l'
 			sh 'ansible-playbook deployment.yml --extra-vars PASS=${NEXUS_CREDENTIAL_ID} BUILD_ID=${BUILD_ID}'
