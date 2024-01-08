@@ -32,7 +32,6 @@ pipeline {
         stage('JUnit Test') {
           steps {
             script {
-              //def junitReportPath = 'target/surefire-reports/*.xml'
               sh 'mvn test'
               junit allowEmptyResults: true, testResults: 'target/surefire-reports/*.xml'
             }
@@ -105,12 +104,10 @@ pipeline {
 	stage('Docker Image Build') {
           steps {
              script {
-		     //def tag = '674583976178.dkr.ecr.us-east-2.amazonaws.com/teamimagerepo:${BUILD_ID}'
-		     //sh 'docker build -t ${tag} ./'
                 image = docker.build(ecr_repo + ":$BUILD_ID", "./") 
 	  }}}
 	    
-        stage('Push Image to AWS ECR'){
+        stage('Push Image to ECR'){
            steps {
               script {
                  docker.withRegistry("https://" + ecr_repo, "ecr:us-east-2:" + ecrCreds) {
@@ -144,11 +141,17 @@ pipeline {
                        return params.Deploy   
                 }}
             steps {
-                 sh 'kubectl apply -f eks1.yml'
-            }
+                 sh '''
+		 kubectl apply -f eks1.yml
+		 kubectl get deployments  
+                 kubectl get svc
+                 '''   }
+         post {
+          always { cleanWs() }
         }
-
+	}
 }
 	post {
           always { cleanWs() }
-}}
+        }
+}
