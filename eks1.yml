@@ -1,25 +1,39 @@
-apiVersion: apps/v1
-kind: Deployment
+apiVersion: v1
+kind: Service
 metadata:
-  name: cicd-app-jenkins 
+  name: cicd-app-jenkins
   labels:
     app: teamcontainer
 spec:
+  type: LoadBalancer
   selector:
-    matchLabels:
-        app: teamcontainer
+    app: teamcontainer
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 80
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: my-deployment
+  labels:
+    app: teamcontainer
+spec:
   replicas: 3
   strategy:
     type: RollingUpdate
+  selector:
+    matchLabels:
+      app: teamcontainer
   template:
     metadata:
       labels:
         app: teamcontainer
     spec:
       containers:
-        - name: teamcontainer
-          image: 674583976178.dkr.ecr.us-east-2.amazonaws.com/teamimagerepo:latest
-          ports:
-            - containerPort: 80
-              protocol: TCP
-          imagePullPolicy: Always
+      - name: teamcontainer
+        image: 674583976178.dkr.ecr.us-east-2.amazonaws.com/teamimagerepo:latest
+        ports:
+        - containerPort: 80
+        imagePullPolicy: Always
