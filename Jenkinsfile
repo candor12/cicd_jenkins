@@ -16,7 +16,7 @@ pipeline {
         NEXUS_REPOSITORY = "team-artifacts"
 	NEXUS_REPO_ID    = "team-artifacts"
         NEXUS_CREDENTIAL_ID = "nexuslogin"
-        ARTVERSION = "7.${env.BUILD_ID}"
+        ARTVERSION = "a.${env.BUILD_ID}"
 	NEXUS_ARTIFACT = "${env.NEXUS_PROTOCOL}://${env.NEXUS_URL}/repository/${env.NEXUS_REPOSITORY}/com/team/project/tmart/${env.ARTVERSION}/tmart-${env.ARTVERSION}.war"
 	ecr_repo = '674583976178.dkr.ecr.us-east-2.amazonaws.com/teamimagerepo'
         ecrCreds = 'awscreds'
