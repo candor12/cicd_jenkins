@@ -30,12 +30,15 @@ pipeline {
                 sh 'mvn clean install -DskipTests'
             }}
 	    
-        stage('OWASP Scan') {
+        stage('JUnit Tests') {
           steps {
-             sh 'mvn org.owasp:dependency-check-maven:check'
-             dependencyCheckPublisher pattern: 'target/dependency-check-report.xml'  
-             //dependencyCheckPublisher pattern: 'dependency-check-report.xml'
-      }}
+            script {
+              def junitReportPath = 'target/surefire-reports/**/*.xml'
+              sh 'mvn test'
+              junit allowEmptyResults: true, testResults: junitReportPath
+            }
+          }
+        }
 	    
         stage('SonarQube Scan') {
 	  when {
