@@ -142,7 +142,7 @@ pipeline {
                 }}
 		steps{
 			dir('ansible'){
-			echo "Stage: Fetch from Nexus & Deploy using Ansible - ${params.deploy}"
+			echo "Stage: Fetch from Nexus & Deploy using Ansible - ${params.Deploy}"
 			sh '''
                         ansible-playbook deployment.yml -e NEXUS_ARTIFACT=${NEXUS_ARTIFACT}  > live_log && tail -2 live_log
 			ls -l
