@@ -3,7 +3,8 @@ all:
   children:
     web1:
   vars:
-    ansible_ssh_private_key_file: client.pem
+    ansible_ssh_private_key_file:  /home/ec2-user/ans/client.pem
+
 
 web1:
   hosts:
