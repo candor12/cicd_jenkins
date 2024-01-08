@@ -20,7 +20,7 @@ pipeline {
 	NEXUS_ARTIFACT = "${env.NEXUS_PROTOCOL}://${env.NEXUS_URL}/repository/${env.NEXUS_REPOSITORY}/com/team/project/tmart/${env.ARTVERSION}/tmart-${env.ARTVERSION}.war"
 	ecr_repo = '674583976178.dkr.ecr.us-east-2.amazonaws.com/teamimagerepo'
         ecrCreds = 'awscreds'
-        image = ''
+	image = "${env.ecr_repo}:${env.BUILD_ID}"
     }
 	
     stages{
@@ -32,9 +32,9 @@ pipeline {
         stage('JUnit Test') {
           steps {
             script {
-              def junitReportPath = 'target/surefire-reports/*.xml'
+              //def junitReportPath = 'target/surefire-reports/*.xml'
               sh 'mvn test'
-              junit allowEmptyResults: true, testResults: junitReportPath
+              junit allowEmptyResults: true, testResults: 'target/surefire-reports/*.xml'
             }
           }
         }
@@ -43,8 +43,7 @@ pipeline {
 	  when {
 		  not{
                    expression {
-                       return params.SonarQube  
-                }}}
+                       return params.SonarQube  }}}
           environment {
                     scannerHome = tool 'sonar4.7'
           }
@@ -105,7 +104,8 @@ pipeline {
 	stage('Docker Image Build') {
           steps {
              script {
-                image = docker.build(ecr_repo + ":$BUILD_ID", "./") }
+		     sh 'docker build -t ${env.image} .'
+                //image = docker.build(ecr_repo + ":$BUILD_ID", "./") }
 	  }}
 	    
         stage('Push Image to AWS ECR'){
