@@ -39,14 +39,10 @@ pipeline {
 			echo "Stage: Fetch from Nexus & Deploy using Ansible"
 			echo "${params.deploy}"
 			//sh 'git clone https://github.com/azka-begh/Jenkins.git && git checkout Anisble-Test'
-			sh 'cd Jenkins && ls -l'
+			//sh 'cd Jenkins && ls -l'
 			sh 'cd ansible && ls -l'
 			sh 'ansible-playbook deployment.yml --extra-vars PASS=${NEXUS_CREDENTIAL_ID} BUILD_ID=${BUILD_ID}'
             }
-		post{
-			always{
-				cleanWs()
-			}
         }
     }}
 	post {
