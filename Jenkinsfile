@@ -4,7 +4,8 @@ pipeline {
       //skipDefaultCheckout() 
       disableConcurrentBuilds()
   }
-    agent { label 'agent1' }
+    agent any
+	//{ label 'agent1' }
     parameters {
 	    booleanParam(name: "Deploy", defaultValue: false, description: "Deploy the Build")
 	    booleanParam(name: "SonarQube", defaultValue: false, description: "ByPass SonarQube Scan")
@@ -60,6 +61,7 @@ pipeline {
                    -Dsonar.jacoco.reportsPath=target/jacoco.exec \
                    -Dsonar.java.checkstyle.reportPaths=target/checkstyle-result.xml'''
 		    }
+		echo "Quality Gate"   
 		timeout(time: 5, unit: 'MINUTES') {
                        def qualitygate = waitForQualityGate(webhookSecretId: 'sqwebhook')
                           if (qualitygate.status != "OK") {
@@ -121,6 +123,7 @@ pipeline {
        }}	    
 	    
 	stage("Fetch from Nexus & Deploy using Ansible"){
+		agent { 'agent1' }
                  when {
                    expression {
                        return params.Deploy   
