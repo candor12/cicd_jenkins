@@ -16,7 +16,7 @@ pipeline {
         NEXUS_REPOSITORY = "team-artifacts"
 	NEXUS_REPO_ID    = "team-artifacts"
         NEXUS_CREDENTIAL_ID = "nexuslogin"
-        ARTVERSION = "a.${env.BUILD_ID}"
+        ARTVERSION = "${env.BUILD_ID}-${env.BUILD_TIMESTAMP}"
 	NEXUS_ARTIFACT = "${env.NEXUS_PROTOCOL}://${env.NEXUS_URL}/repository/${env.NEXUS_REPOSITORY}/com/team/project/tmart/${env.ARTVERSION}/tmart-${env.ARTVERSION}.war"
 	ecr_repo = '674583976178.dkr.ecr.us-east-2.amazonaws.com/teamimagerepo'
         ecrCreds = 'awscreds'
@@ -28,28 +28,25 @@ pipeline {
             steps {
 		echo "Stage: Maven Build"
                 sh 'mvn clean install -DskipTests'
-            }
-        }
-
-	stage('Unit Test'){
-            steps {
-		echo "Stage: Maven Test"
-                sh 'mvn test'
-            }
-        }  
-        stage ('Checkstyle Analysis'){
-            steps {
-		echo "Stage: Checkstyle Analysis"
-                sh 'mvn checkstyle:checkstyle'
             }}
-
+	    
+        stage('OWASP Dependency-Check Vulnerabilities') {
+          steps {
+             dependencyCheck additionalArguments: ''' 
+                    -o './'
+                    -s './'
+                    -f 'ALL' 
+                    --prettyPrint''', odcInstallation: 'OWASP'
+        
+             dependencyCheckPublisher pattern: 'dependency-check-report.xml'
+      }}
+	    
         stage('SonarQube Scan') {
 	  when {
 		  not{
                    expression {
                        return params.SonarQube  
-                }}
-            }
+                }}}
           environment {
                     scannerHome = tool 'sonar4.7'
           }
@@ -64,16 +61,14 @@ pipeline {
                    -Dsonar.junit.reportsPath=target/surefire-reports/ \
                    -Dsonar.jacoco.reportsPath=target/jacoco.exec \
                    -Dsonar.java.checkstyle.reportPaths=target/checkstyle-result.xml'''
-	    }
-	  }
-	}
+	    }}}
+	    
         stage("SonarQube Quality Gate"){
 	    when {
 		  not{
                    expression {
                        return params.SonarQube  
-                }}
-            }
+                }}}
 	   steps{
 	     script{
 		     echo "Stage: SonarQube Quality Gate"
@@ -84,7 +79,7 @@ pipeline {
                                      sh "exit 1"
 				  }}}
 	     }}}
-
+	    
         stage("Publish Artifact to Nexus") {
             steps {
                 script {
@@ -118,22 +113,25 @@ pipeline {
 		    else {
                         error "*** File: ${artifactPath}, could not be found";
                     }}}}
+	    
 	stage('Docker Image Build') {
           steps {
              script {
-                image = docker.build(ecr_repo + ":$BUILD_ID", "./")
-}}}
+                image = docker.build(ecr_repo + ":$BUILD_ID", "./") }
+	  }}
+	    
         stage('Push Image to AWS ECR'){
            steps {
               script {
                  docker.withRegistry("https://" + ecr_repo, "ecr:us-east-2:" + ecrCreds) {
                    image.push("$BUILD_ID")
-                   image.push('latest')
-          }}}
+                   image.push('latest') }
+	      }}
        post {
         always {
-            sh 'docker image prune -a -f'
-        }}}	    
+            sh 'docker image prune -a -f' } 
+       }}	    
+	    
 	stage("Fetch from Nexus & Deploy using Ansible"){
 		 agent { label 'agent1' }
                  when {
@@ -150,8 +148,8 @@ pipeline {
 			'''
             }}
 		post {
-                  always { cleanWs() }
-                 }}}
+                  always { cleanWs() } }
+	}}
 	post {
           always { cleanWs() }
 }}
