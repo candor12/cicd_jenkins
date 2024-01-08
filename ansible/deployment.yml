@@ -6,7 +6,7 @@
   tasks:
     - name: Fetch Artifact from Nexus
       get_url:
-        url: "http://team:{{PASS}}@172.31.18.80:8081/repository/team-artifacts/com/team/project/tmart/{{BUILD_ID}}/tmart-{{BUILD_ID}}.war"
+        url: "http://172.31.18.80:8081/repository/team-artifacts/com/team/project/tmart/{{BUILD_ID}}/tmart-{{BUILD_ID}}.war"
         dest: "/tmp/stagingArea"
       register: wardeploy
 
