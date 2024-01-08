@@ -105,7 +105,7 @@ pipeline {
 	stage('Docker Image Build') {
           steps {
              script {
-		     sh 'docker build -t 674583976178.dkr.ecr.us-east-2.amazonaws.com/teamimagerepo:${env.BUILD_ID} ./'
+		     sh 'docker build -t 674583976178.dkr.ecr.us-east-2.amazonaws.com/teamimagerepo:7 ./'
                 //image = docker.build(ecr_repo + ":$BUILD_ID", "./") }
 	  }}}
 	    
