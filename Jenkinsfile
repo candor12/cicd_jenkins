@@ -161,8 +161,11 @@ pipeline {
 		steps{
 			echo "Stage: Fetch from Nexus & Deploy using Ansible"
 			echo "${params.deploy}"
-			sh 'cd /home/ec2-user/ansible'
-			sh 'ls -l'
+			sh 'git clone -b Anisble-Test https://github.com/azka-begh/Jenkins.git'
+			sh '''cd Jenkins \
+                              ls -l \
+			      cd Ansible \
+			      ls -l'''
 			sh 'ansible-playbook deployment.yml --extra-vars BUILD_ID=${BUILD_ID}'
             }
 		post{
