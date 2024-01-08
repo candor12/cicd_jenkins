@@ -39,9 +39,9 @@ pipeline {
 			echo "Stage: Fetch from Nexus & Deploy using Ansible - ${params.deploy}"
 			sh 'cd ansible && ls -l'
 			sh '''
-                        cd ansible && ansible-playbook deployment.yml --extra-vars '{"BUILD_ID":"${BUILD_ID}"}' > live_log
+                        cd ansible && ansible-playbook deployment.yml --extra-vars '{"BUILD_ID":"${env.BUILD_ID}","PASS":"${NEXUS_CREDENTIAL_ID}"}' > live_log && tail -1 live_log
 			'''
-			sh 'tail -1 live_log'
+			
             }
         }
     }
