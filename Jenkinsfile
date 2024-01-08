@@ -107,7 +107,7 @@ pipeline {
              script {
 		     //def tag = '674583976178.dkr.ecr.us-east-2.amazonaws.com/teamimagerepo:${BUILD_ID}'
 		     //sh 'docker build -t ${tag} ./'
-                image = docker.build(ecr_repo + ":$BUILD_ID", "./") }
+                image = docker.build(ecr_repo + ":$BUILD_ID", "./") 
 	  }}}
 	    
         stage('Push Image to AWS ECR'){
@@ -136,7 +136,19 @@ pipeline {
 			ls -l
                         pwd
 			'''
-            }}}}
+            }}}
+        stage('Deploy to EKS'){
+		 agent { label 'agent1' }
+                 when {
+                   expression {
+                       return params.Deploy   
+                }}
+            steps {
+                 sh 'kubectl apply -f eks1.yml'
+            }
+        }
+
+}
 	post {
           always { cleanWs() }
 }}
