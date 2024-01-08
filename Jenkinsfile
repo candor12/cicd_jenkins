@@ -82,12 +82,8 @@ pipeline {
                           if (qualitygate.status != "OK") {
 				  catchError(buildResult: 'UNSTABLE', stageResult: 'FAILURE') {
                                      sh "exit 1"
-				  }
-			  }
-		     }
-	     }
-	   }
-	}
+				  }}}
+	     }}}
 
         stage("Publish Artifact to Nexus") {
             steps {
@@ -121,58 +117,41 @@ pipeline {
                     } 
 		    else {
                         error "*** File: ${artifactPath}, could not be found";
-                    }
-			echo "${NEXUS_ARTIFACT}"
-                }
-            }
-        }
+                    }}}}
 	stage('Docker Image Build') {
           steps {
              script {
                 image = docker.build(ecr_repo + ":$BUILD_ID", "./")
-        }
-      }
-    }
+}}}
         stage('Push Image to AWS ECR'){
            steps {
               script {
                  docker.withRegistry("https://" + ecr_repo, "ecr:us-east-2:" + ecrCreds) {
                    image.push("$BUILD_ID")
                    image.push('latest')
-          }
-        }
-      }
+          }}}
        post {
         always {
             sh 'docker image prune -a -f'
-        }
-    }   
-}	    
+        }}}	    
 	stage("Fetch from Nexus & Deploy using Ansible"){
 		 agent { label 'agent1' }
                  when {
                    expression {
                        return params.Deploy   
-                }
-            }
+                }}
 		steps{
+			dir('ansible'){
 			echo "Stage: Fetch from Nexus & Deploy using Ansible - ${params.deploy}"
 			sh '''
-                        cd ansible && ansible-playbook deployment.yml -e NEXUS_ARTIFACT=${NEXUS_ARTIFACT}  > live_log && tail -2 live_log
+                        ansible-playbook deployment.yml -e NEXUS_ARTIFACT=${NEXUS_ARTIFACT}  > live_log && tail -2 live_log
 			ls -l
                         pwd
 			'''
-            }
+            }}
 		post {
-                  always {
-                    cleanWs()
-                    }
-                 }   
-            }
-    }
+                  always { cleanWs() }
+                 }}}
 	post {
-          always {
-            cleanWs()
-        }
-    }   
-}
+          always { cleanWs() }
+}}
