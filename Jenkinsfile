@@ -20,7 +20,7 @@ pipeline {
 	ecr_repo = '674583976178.dkr.ecr.us-east-2.amazonaws.com/teamimagerepo'
         ecrCreds = 'awscreds'
         image = ''
-	VAR = {"BUILD_ID":"${env.BUILD_ID}"}
+	VAR = "BUILD_ID":"${env.BUILD_ID}"
     }
 	
     stages{
@@ -40,7 +40,7 @@ pipeline {
 			echo "Stage: Fetch from Nexus & Deploy using Ansible - ${params.deploy}"
 			sh 'cd ansible && ls -l'
 			sh '''
-                        cd ansible && ansible-playbook deployment.yml --extra-vars '${env.VAR}' > live_log && tail -1 live_log
+                        cd ansible && ansible-playbook deployment.yml --extra-vars '{${env.VAR}}' > live_log && tail -1 live_log
 			'''
 			
             }
