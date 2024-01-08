@@ -106,7 +106,7 @@ pipeline {
              script {
 		     sh 'docker build -t ${env.image} .'
                 //image = docker.build(ecr_repo + ":$BUILD_ID", "./") }
-	  }}
+	  }}}
 	    
         stage('Push Image to AWS ECR'){
            steps {
