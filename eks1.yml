@@ -4,14 +4,14 @@ metadata:
   name: cicd-app-jenkins
   labels:
     app: teamcontainer
-spec:
-  type: LoadBalancer
-  selector:
-    app: teamcontainer
-  ports:
-    - protocol: TCP
-      port: 80
-      targetPort: 80
+spec:  
+  type: LoadBalancer  
+  ports:  
+  - name: "http"  
+    port: 80  
+    targetPort: 80  
+  selector:  
+    app: nginx
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -20,7 +20,7 @@ metadata:
   labels:
     app: teamcontainer
 spec:
-  replicas: 3
+  replicas: 1
   strategy:
     type: RollingUpdate
   selector:
@@ -37,3 +37,4 @@ spec:
         ports:
         - containerPort: 80
         imagePullPolicy: Always
+        
