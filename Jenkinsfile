@@ -123,7 +123,7 @@ pipeline {
        }}	    
 	    
 	stage("Fetch from Nexus & Deploy using Ansible"){
-		agent { 'agent1' }
+		agent { label 'agent1' }
                  when {
                    expression {
                        return params.Deploy   
