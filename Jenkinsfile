@@ -92,7 +92,7 @@ pipeline {
 	     }
 	   }
 	}
-
+/*
         stage("Publish Artifact to Nexus") {
             steps {
                 script {
@@ -128,7 +128,7 @@ pipeline {
                     }
                 }
             }
-        }
+        } */
 	stage('Dockerfile Build') {
           steps {
              script {
@@ -162,10 +162,15 @@ pipeline {
 			echo "Stage: Fetch from Nexus & Deploy using Ansible"
 			echo "${params.deploy}"
 			sh 'cd /home/ec2-user/ansible'
+			sh 'ls -l'
 			sh 'ansible-playbook deployment.yml --extra-vars BUILD_ID=${BUILD_ID}'
             }
+		post{
+			always{
+				cleanWs()
+			}
         }
-    }
+    }}
 	post {
           always {
             cleanWs()
