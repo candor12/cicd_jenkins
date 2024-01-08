@@ -28,8 +28,8 @@
         <url>http://172.31.18.80:8081/repository/team-artifacts</url>
     </repository>
 </distributionManagement> 
-
-    <dependencies>
+	
+<dependencies>
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-web</artifactId>
@@ -212,21 +212,7 @@
  		            </execution>
  		        </executions>
  		</plugin>
-	<!	<plugin>
-                       <groupId>org.owasp</groupId>
-                       <artifactId>dependency-check-maven</artifactId>
-			<configuration>
-                            <nvdApiKey>nvd</nvdApiKey>
-			    <failOnError>false</failOnError>
-                       </configuration>
-                       <executions>
-                          <execution>
-                          <goals>
-                            <goal>check</goal>
-                         </goals>
-                      </execution>
-                     </executions>
-               </plugin>   !>
-	</plugins>
+		
+        </plugins>
     </build>
 </project>
