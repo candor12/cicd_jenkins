@@ -4,7 +4,7 @@ pipeline {
       //skipDefaultCheckout() 
       disableConcurrentBuilds()
   }
-    agent any
+    agent { label agent1 }
     parameters {
 	    booleanParam(name: "Deploy", defaultValue: false, description: "Deploy the Build")
 	    booleanParam(name: "SonarQube", defaultValue: false, description: "ByPass SonarQube Scan")
@@ -24,13 +24,12 @@ pipeline {
     }
 	
     stages{
-	stage('Maven Build Artifact'){
+	stage('Maven Build'){
             steps {
-		echo "Stage: Maven Build"
                 sh 'mvn clean install -DskipTests'
             }}
 	    
-        stage('JUnit Tests') {
+        stage('JUnit Test') {
           steps {
             script {
               def junitReportPath = 'target/surefire-reports/*.xml'
@@ -122,23 +121,19 @@ pipeline {
        }}	    
 	    
 	stage("Fetch from Nexus & Deploy using Ansible"){
-		 agent { label 'agent1' }
                  when {
                    expression {
                        return params.Deploy   
                 }}
 		steps{
 			dir('ansible'){
-			echo "Stage: Fetch from Nexus & Deploy using Ansible - ${params.Deploy}"
+			echo "${params.Deploy}"
 			sh '''
                         ansible-playbook deployment.yml -e NEXUS_ARTIFACT=${NEXUS_ARTIFACT}  > live_log && tail -2 live_log
 			ls -l
                         pwd
 			'''
-            }}
-		post {
-                  always { cleanWs() } }
-	}}
+            }}}}
 	post {
           always { cleanWs() }
 }}
