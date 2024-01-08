@@ -5,7 +5,6 @@ pipeline {
       disableConcurrentBuilds()
   }
     agent any
-	//{ label 'agent1' }
     parameters {
 	    booleanParam(name: "Deploy", defaultValue: false, description: "Deploy the Build")
 	    booleanParam(name: "SonarQube", defaultValue: false, description: "ByPass SonarQube Scan")
@@ -21,7 +20,7 @@ pipeline {
 	NEXUS_ARTIFACT = "${env.NEXUS_PROTOCOL}://${env.NEXUS_URL}/repository/${env.NEXUS_REPOSITORY}/com/team/project/tmart/${env.ARTVERSION}/tmart-${env.ARTVERSION}.war"
 	ecr_repo = '674583976178.dkr.ecr.us-east-2.amazonaws.com/teamimagerepo'
         ecrCreds = 'awscreds'
-	image = '${env.ecr_repo}:${env.BUILD_ID}'
+	image = ''
     }
 	
     stages{
@@ -106,7 +105,7 @@ pipeline {
 	stage('Docker Image Build') {
           steps {
              script {
-		     sh 'docker build -t ${env.image} .'
+		     sh 'docker build -t 674583976178.dkr.ecr.us-east-2.amazonaws.com/teamimagerepo:${env.BUILD_ID} ./'
                 //image = docker.build(ecr_repo + ":$BUILD_ID", "./") }
 	  }}}
 	    
