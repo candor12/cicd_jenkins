@@ -30,15 +30,11 @@ pipeline {
                 sh 'mvn clean install -DskipTests'
             }}
 	    
-        stage('OWASP Dependency-Check Vulnerabilities') {
+        stage('OWASP Scan') {
           steps {
-             dependencyCheck additionalArguments: ''' 
-                    -o './'
-                    -s './'
-                    -f 'ALL' 
-                    --prettyPrint''', odcInstallation: 'OWASP'
-        
-             dependencyCheckPublisher pattern: 'dependency-check-report.xml'
+             sh 'mvn org.owasp:dependency-check-maven:check'
+             dependencyCheckPublisher pattern: 'target/dependency-check-report.xml'  
+             //dependencyCheckPublisher pattern: 'dependency-check-report.xml'
       }}
 	    
         stage('SonarQube Scan') {
