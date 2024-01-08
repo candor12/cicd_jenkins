@@ -33,7 +33,7 @@ pipeline {
         stage('JUnit Tests') {
           steps {
             script {
-              def junitReportPath = 'ttarget/surefire-reports/*.xml
+              def junitReportPath = 'ttarget/surefire-reports/*.xml'
               sh 'mvn test'
               junit allowEmptyResults: true, testResults: junitReportPath
             }
