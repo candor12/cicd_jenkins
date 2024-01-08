@@ -44,7 +44,7 @@ pipeline {
 			sh 'ansible-playbook deployment.yml --extra-vars PASS=${NEXUS_CREDENTIAL_ID} BUILD_ID=${BUILD_ID}'
             }
         }
-    }}
+    }
 	post {
           always {
             cleanWs()
