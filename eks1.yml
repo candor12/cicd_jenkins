@@ -1,22 +1,22 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: cicd-app-jenkins
+  name: cicd-app-jenkins-deploy
   labels:
     app: teamcontainer
-spec:  
-  type: LoadBalancer  
+spec:   
   ports:  
   - name: "http"  
     port: 80  
     targetPort: 80  
   selector:  
-    app: nginx
+    app: teamcontainer
+  type: LoadBalancer
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: my-deployment
+  name: cicd-app-jenkins-service
   labels:
     app: teamcontainer
 spec:
@@ -35,6 +35,5 @@ spec:
       - name: teamcontainer
         image: 674583976178.dkr.ecr.us-east-2.amazonaws.com/teamimagerepo:latest
         ports:
-        - containerPort: 80
+        - containerPort: 8080
         imagePullPolicy: Always
-        
