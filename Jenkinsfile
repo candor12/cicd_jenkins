@@ -18,6 +18,7 @@ pipeline {
         NEXUS_CREDENTIAL_ID = "nexuslogin"
         ARTVERSION = "${env.BUILD_ID}-${env.BUILD_TIMESTAMP}"
 	NEXUS_ARTIFACT = "${env.NEXUS_PROTOCOL}://${env.NEXUS_URL}/repository/${env.NEXUS_REPOSITORY}/com/team/project/tmart/${env.ARTVERSION}/tmart-${env.ARTVERSION}.war"
+	scannerHome = tool 'sonar4.7'
 	ecr_repo = '674583976178.dkr.ecr.us-east-2.amazonaws.com/teamimagerepo'
         ecrCreds = 'awscreds'
 	image = ''
@@ -43,8 +44,8 @@ pipeline {
 		echo "Stage: Checkstyle Analysis"
                 sh 'mvn checkstyle:checkstyle'
 		recordIssues enabledForFailure: false, tool: checkStyle()
-		//catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
-               // sh "exit 1"  }
+		catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
+                     sh "exit 1"  }
 	    }}
 	}
         stage('SonarQube Scan') {
@@ -53,7 +54,7 @@ pipeline {
                    expression {
                        return params.SonarQube  }}}
           environment {
-                    scannerHome = tool 'sonar4.7'
+                    
           }
           steps {
 	    script{
@@ -135,14 +136,20 @@ pipeline {
                        return params.Deploy   
                 }}
 		steps{
+		     script{
 			dir('ansible'){
 			echo "${params.Deploy}"
 			sh '''
-                        ansible-playbook deployment.yml -e NEXUS_ARTIFACT=${NEXUS_ARTIFACT}  > live_log && tail -2 live_log
-			ls -l
-                        pwd
+                        ansible-playbook deployment.yml -e NEXUS_ARTIFACT=${NEXUS_ARTIFACT} > live_log
 			'''
-            }}}
+		        def exit_status = $?
+                        if [ $exit_status -ne 0 ]; 
+			then
+                           exit -1
+			else
+			   sh 'tail -2 live_log'	
+                        fi 	
+            }}}}
         stage('Deploy to EKS'){
 		 agent { label 'agent1' }
                  when {
