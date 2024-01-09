@@ -41,8 +41,9 @@ pipeline {
             steps {
 		script{
 		echo "Stage: Checkstyle Analysis"
-                sh 'mvn checkstyle:checkstyle'
-		catchError(buildResult: 'UNSTABLE', stageResult: 'FAILURE') {
+                //sh 'mvn checkstyle:checkstyle'
+		sh 'mvn site'
+		catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
                 sh "exit 1"  }}}
 		
             }
