@@ -35,9 +35,11 @@ pipeline {
             script {
               sh 'mvn test -Dcheckstyle.skip'
               junit allowEmptyResults: true, testResults: 'target/surefire-reports/*.xml'
-            }
-          }
-        }
+            }}
+	  post{
+		  always {
+		  archiveArtifacts artifacts: 'target/surefire-reports/*.xml', onlyIfSuccessful: true
+	}}
 	stage ('Checkstyle Analysis'){
             steps {
 		script{
