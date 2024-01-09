@@ -7,7 +7,7 @@
     - debug: msg="{{ lookup('env','BUILD_TAG') }}"
     - name: Fetch Artifact from Nexus
       get_url:
-        url: "http://172.31.18.80:8081/repository/team-artifacts/com/team/project/tmart/{{BUILD_ID}}/tmart-{{BUILD_ID}}.war"
+        url: "{{ NEXUS_ARTIFACT }}"
         dest: "/tmp/stagingArea"
       register: wardeploy
 
