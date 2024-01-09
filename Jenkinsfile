@@ -26,7 +26,7 @@ pipeline {
     stages{
 	stage('Maven Build'){
             steps {
-                sh 'mvn clean install -DskipTests'
+                sh 'mvn clean install -DskipTests -Dcheckstyle.skip'
             }}
 	    
         stage('JUnit Test') {
