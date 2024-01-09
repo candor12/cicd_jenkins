@@ -137,7 +137,7 @@ pipeline {
 			dir('ansible'){
 			echo "${params.Deploy}"
 			sh 'ansible-playbook deployment.yml -e NEXUS_ARTIFACT=${NEXUS_ARTIFACT} > live_log || exit 1'
-		      //  sh 'tail -2 live_log'	
+		        sh 'tail -2 live_log'	
 			}	
             }}}
         stage('Deploy to EKS'){
