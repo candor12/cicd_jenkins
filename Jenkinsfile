@@ -146,7 +146,7 @@ pipeline {
 		script{
 		 sh 'eksctl get cluster --region us-east-2'
 		 def exit_code = sh script: 'echo $?'
-		 if (exit_code == 0){
+		 if (exit_code != 0){
 			sh './k8s/cluster.sh'
 		 }
                  sh '''
