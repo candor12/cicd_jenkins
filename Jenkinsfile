@@ -139,15 +139,10 @@ pipeline {
 		     script{
 			dir('ansible'){
 			echo "${params.Deploy}"
-			sh '''
-                        ansible-playbook deployment.yml -e NEXUS_ARTIFACT=${NEXUS_ARTIFACT} > live_log
-			'''
-		        def exit_status = $?
-                        if ($exit_status -ne 0){ 
-				sh 'exit -1' }
-			else{
-			   sh 'tail -2 live_log'	}	
-            }}}}
+			sh 'ansible-playbook deployment.yml -e NEXUS_ARTIFACT=${NEXUS_ARTIFACT} > live_log || exit 1'
+		      //  sh 'tail -2 live_log'	
+			}	
+            }}}
         stage('Deploy to EKS'){
 		 agent { label 'agent1' }
                  when {
