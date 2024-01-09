@@ -53,9 +53,6 @@ pipeline {
 		  not{
                    expression {
                        return params.SonarQube  }}}
-          environment {
-                    
-          }
           steps {
 	    script{
               withSonarQubeEnv('sonar') {
@@ -72,9 +69,9 @@ pipeline {
 		echo "Quality Gate"   
 		timeout(time: 5, unit: 'MINUTES') {
                        def qualitygate = waitForQualityGate(webhookSecretId: 'sqwebhook')
-                          if (qualitygate.status != "OK") {
-				  catchError(buildResult: 'UNSTABLE', stageResult: 'FAILURE') {
-                                     sh "exit 1"  }}}
+                       if (qualitygate.status != "OK") {
+			   catchError(buildResult: 'UNSTABLE', stageResult: 'FAILURE') {
+                                sh "exit 1"  }}}
 	  }}}
 
         stage("Publish Artifact to Nexus") {
