@@ -150,7 +150,7 @@ pipeline {
 			sh './k8s/cluster.sh'
 		 }
                  sh '''
-		 kubectl apply -f eks1.yml
+		 kubectl apply -f ./k8s/eksdeploy.yml
 		 kubectl get deployments  
                  sleep 10
                  kubectl get svc
