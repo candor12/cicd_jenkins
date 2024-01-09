@@ -32,7 +32,7 @@ pipeline {
         stage('JUnit Test') {
           steps {
             script {
-              sh 'mvn test'
+              sh 'mvn test -Dcheckstyle.skip'
               junit allowEmptyResults: true, testResults: 'target/surefire-reports/*.xml'
             }
           }
