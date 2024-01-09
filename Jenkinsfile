@@ -39,9 +39,13 @@ pipeline {
         }
 	stage ('Checkstyle Analysis'){
             steps {
+		script{
 		echo "Stage: Checkstyle Analysis"
                 sh 'mvn checkstyle:checkstyle'
-            }}
+		catchError(buildResult: 'UNSTABLE', stageResult: 'FAILURE') {
+                sh "exit 1"  }}}
+		
+            }
 	    
         stage('SonarQube Scan') {
 	  when {
