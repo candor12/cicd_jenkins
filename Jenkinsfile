@@ -36,18 +36,14 @@ pipeline {
               sh 'mvn test -Dcheckstyle.skip'
               junit allowEmptyResults: true, testResults: 'target/surefire-reports/*.xml'
             }}
-	  post{
-		  always {
-		  archiveArtifacts artifacts: 'target/surefire-reports/*.xml', onlyIfSuccessful: true
-	}}}
+	}
 	stage ('Checkstyle Analysis'){
             steps {
 		script{
 		echo "Stage: Checkstyle Analysis"
                 sh 'mvn checkstyle:checkstyle'
 		recordIssues enabledForFailure: false, tool: checkStyle()
-		catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
-                     sh "exit 1"  }
+		archiveArtifacts artifacts:'target/checkstyle-result.xml'
 	    }}
 	}
         stage('SonarQube Scan') {
