@@ -1,0 +1,32 @@
+
+    stage('OWASP ZAP Scan') {
+      steps {
+        script{
+         sh '''chmod 777 \$(pwd)
+         docker run --rm -v \$(pwd):/zap/wrk/:rw --name owasp -dt owasp/zap2docker-live /bin/bash
+         docker exec owasp zap-baseline.py -t http://a92cb43253faf4ba3a4f8010f35569d1-16452339.us-east-2.elb.amazonaws.com/login -I -j --auto -r owasptest.html
+         '''
+         def containerExists = sh(script: "docker ps -a --format '{{.Names}}' | grep -wq owasp", returnStatus: true)
+          if (containerExists == 0) {
+                        sh 'docker cp owasp:/zap/wrk/testreport.html ${WORKSPACE}/owasptest.html'
+          } else {
+                        echo "OWASP ZAP container not found or already removed. Skipping report copy."
+        }
+				publishHTML([
+                    allowMissing: true,
+				    alwaysLinkToLastBuild: true,
+				    keepAll: true,
+                    reportDir: './',
+                    reportFiles: 'owasptest.html',
+                    reportName: 'Scan-Report',
+                    reportTitles: 'HTML, XML, JSON'
+                ])
+    }
+			}
+post {
+    always {
+        sh '''
+             docker stop owasp
+             docker rm owasp
+         '''}}}
+ -config api.key=change-me-9203935709
