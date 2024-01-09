@@ -39,7 +39,7 @@ pipeline {
 	  post{
 		  always {
 		  archiveArtifacts artifacts: 'target/surefire-reports/*.xml', onlyIfSuccessful: true
-	}}
+	}}}
 	stage ('Checkstyle Analysis'){
             steps {
 		script{
