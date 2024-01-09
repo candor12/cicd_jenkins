@@ -145,12 +145,16 @@ pipeline {
                        return params.Deploy   
                 }}
             steps {
+		script{
+		 sh 'eksctl get cluster --region us-east-2'
+		 if ($? -ne 0){
+			sh './k8s/cluster.sh' }
                  sh '''
 		 kubectl apply -f eks1.yml
 		 kubectl get deployments  
                  sleep 10
                  kubectl get svc
-                 '''   }
+                 '''   }}
          post {
           always { cleanWs() }
         }
