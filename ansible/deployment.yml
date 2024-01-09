@@ -4,7 +4,6 @@
   vars:
     timestamp: "{{ansible_date_time.date}}-{{ansible_date_time.hour}}.{{ansible_date_time.minute}}"
   tasks:
-    - debug: msg="{{ lookup('env','BUILD_TAG') }}"
     - name: Fetch Artifact from Nexus
       get_url:
         url: "{{ NEXUS_ARTIFACT }}"
