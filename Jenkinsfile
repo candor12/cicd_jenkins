@@ -27,25 +27,21 @@ pipeline {
     stages{
 	stage('Maven Build'){
             steps {
-                sh 'mvn clean install -DskipTests -Dcheckstyle.skip'
+                sh 'mvn clean install -DskipTests'
             }}
 	    
         stage('JUnit Test') {
           steps {
             script {
-              sh 'mvn test -Dcheckstyle.skip'
+              sh 'mvn test'
               junit allowEmptyResults: true, testResults: 'target/surefire-reports/*.xml'
-            }
-          }
-        }
+            }}
+	}
 	stage ('Checkstyle Analysis'){
             steps {
 		script{
-		echo "Stage: Checkstyle Analysis"
                 sh 'mvn checkstyle:checkstyle'
 		recordIssues enabledForFailure: false, tool: checkStyle()
-		catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
-                     sh "exit 1"  }
 	    }}
 	}
         stage('SonarQube Scan') {
@@ -147,12 +143,18 @@ pipeline {
                        return params.Deploy   
                 }}
             steps {
+		script{
+		 sh 'eksctl get cluster --region us-east-2'
+		 def exit_code = sh script: 'echo $?'
+		 if (exit_code == 0){
+			sh './k8s/cluster.sh'
+		 }
                  sh '''
 		 kubectl apply -f eks1.yml
 		 kubectl get deployments  
                  sleep 10
                  kubectl get svc
-                 '''   }
+                 '''   }}
          post {
           always { cleanWs() }
         }
