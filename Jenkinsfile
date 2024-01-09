@@ -143,12 +143,10 @@ pipeline {
                         ansible-playbook deployment.yml -e NEXUS_ARTIFACT=${NEXUS_ARTIFACT} > live_log
 			'''
 		        def exit_status = $?
-                        if [ $exit_status -ne 0 ]; 
-			then
-                           exit -1
-			else
-			   sh 'tail -2 live_log'	
-                        fi 	
+                        if ($exit_status -ne 0){ 
+				sh 'exit -1' }
+			else{
+			   sh 'tail -2 live_log'	}	
             }}}}
         stage('Deploy to EKS'){
 		 agent { label 'agent1' }
