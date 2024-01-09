@@ -144,6 +144,7 @@ pipeline {
                  sh '''
 		 kubectl apply -f eks1.yml
 		 kubectl get deployments  
+                 sleep 10
                  kubectl get svc
                  '''   }
          post {
