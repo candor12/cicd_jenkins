@@ -37,6 +37,11 @@ pipeline {
             }
           }
         }
+	stage ('Checkstyle Analysis'){
+            steps {
+		echo "Stage: Checkstyle Analysis"
+                sh 'mvn checkstyle:checkstyle'
+            }}
 	    
         stage('SonarQube Scan') {
 	  when {
