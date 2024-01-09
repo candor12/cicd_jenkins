@@ -42,10 +42,10 @@ pipeline {
 		script{
 		echo "Stage: Checkstyle Analysis"
                 sh 'mvn checkstyle:checkstyle'
+		recordIssues enabledForFailure: true, tool: checkStyle()
 		catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
                 sh "exit 1"  }}}
-            }
-	    
+	}
         stage('SonarQube Scan') {
 	  when {
 		  not{
