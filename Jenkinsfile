@@ -18,6 +18,7 @@ pipeline {
         NEXUS_CREDENTIAL_ID = "nexuslogin"
         ARTVERSION = "${env.BUILD_ID}-${env.BUILD_TIMESTAMP}"
 	NEXUS_ARTIFACT = "${env.NEXUS_PROTOCOL}://${env.NEXUS_URL}/repository/${env.NEXUS_REPOSITORY}/com/team/project/tmart/${env.ARTVERSION}/tmart-${env.ARTVERSION}.war"
+	scannerHome = tool 'sonar4.7'
 	ecr_repo = '674583976178.dkr.ecr.us-east-2.amazonaws.com/teamimagerepo'
         ecrCreds = 'awscreds'
 	image = ''
@@ -26,31 +27,32 @@ pipeline {
     stages{
 	stage('Maven Build'){
             steps {
-                sh 'mvn clean install -DskipTests'
+                sh 'mvn clean install -DskipTests -Dcheckstyle.skip'
             }}
 	    
         stage('JUnit Test') {
           steps {
             script {
-              sh 'mvn test'
+              sh 'mvn test -Dcheckstyle.skip'
               junit allowEmptyResults: true, testResults: 'target/surefire-reports/*.xml'
             }
           }
         }
 	stage ('Checkstyle Analysis'){
             steps {
+		script{
 		echo "Stage: Checkstyle Analysis"
                 sh 'mvn checkstyle:checkstyle'
-            }}
-	    
+		recordIssues enabledForFailure: false, tool: checkStyle()
+		catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
+                     sh "exit 1"  }
+	    }}
+	}
         stage('SonarQube Scan') {
 	  when {
 		  not{
                    expression {
                        return params.SonarQube  }}}
-          environment {
-                    scannerHome = tool 'sonar4.7'
-          }
           steps {
 	    script{
               withSonarQubeEnv('sonar') {
@@ -67,9 +69,9 @@ pipeline {
 		echo "Quality Gate"   
 		timeout(time: 5, unit: 'MINUTES') {
                        def qualitygate = waitForQualityGate(webhookSecretId: 'sqwebhook')
-                          if (qualitygate.status != "OK") {
-				  catchError(buildResult: 'UNSTABLE', stageResult: 'FAILURE') {
-                                     sh "exit 1"  }}}
+                       if (qualitygate.status != "OK") {
+			   catchError(buildResult: 'UNSTABLE', stageResult: 'FAILURE') {
+                                sh "exit 1"  }}}
 	  }}}
 
         stage("Publish Artifact to Nexus") {
@@ -131,13 +133,12 @@ pipeline {
                        return params.Deploy   
                 }}
 		steps{
+		     script{
 			dir('ansible'){
 			echo "${params.Deploy}"
-			sh '''
-                        ansible-playbook deployment.yml -e NEXUS_ARTIFACT=${NEXUS_ARTIFACT}  > live_log && tail -2 live_log
-			ls -l
-                        pwd
-			'''
+			sh 'ansible-playbook deployment.yml -e NEXUS_ARTIFACT=${NEXUS_ARTIFACT} > live_log || exit 1'
+		        sh 'tail -2 live_log'	
+			}	
             }}}
         stage('Deploy to EKS'){
 		 agent { label 'agent1' }
