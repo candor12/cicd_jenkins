@@ -27,23 +27,21 @@ pipeline {
     stages{
 	stage('Maven Build'){
             steps {
-                sh 'mvn clean install -DskipTests -Dcheckstyle.skip'
+                sh 'mvn clean install -DskipTests'
             }}
 	    
         stage('JUnit Test') {
           steps {
             script {
-              sh 'mvn test -Dcheckstyle.skip'
+              sh 'mvn test'
               junit allowEmptyResults: true, testResults: 'target/surefire-reports/*.xml'
             }}
 	}
 	stage ('Checkstyle Analysis'){
             steps {
 		script{
-		echo "Stage: Checkstyle Analysis"
                 sh 'mvn checkstyle:checkstyle'
 		recordIssues enabledForFailure: false, tool: checkStyle()
-		archiveArtifacts artifacts:'target/checkstyle-result.xml'
 	    }}
 	}
         stage('SonarQube Scan') {
@@ -147,8 +145,10 @@ pipeline {
             steps {
 		script{
 		 sh 'eksctl get cluster --region us-east-2'
-		 if ($? -ne 0){
-			sh './k8s/cluster.sh' }
+		 def exit_code = sh script: 'echo $?'
+		 if (exit_code == 0){
+			sh './k8s/cluster.sh'
+		 }
                  sh '''
 		 kubectl apply -f eks1.yml
 		 kubectl get deployments  
