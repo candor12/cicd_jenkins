@@ -4,6 +4,8 @@ pipeline {
                 //skipDefaultCheckout() 
                 disableConcurrentBuilds()
 	}
+	tools {
+        jdk "jdk-11" }
 	agent any
 	parameters {
 		booleanParam(name: "Deploy", defaultValue: false, description: "Deploy the Build")
