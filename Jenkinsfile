@@ -141,10 +141,10 @@ pipeline {
 				script{
 					dir('ansible'){
 						echo "${params.AnsibleDeploy}"
-						sh 'ansible-playbook deployment.yml -e NEXUS_ARTIFACT=${NEXUS_ARTIFACT} > live_log || exit 1'
-						sh 'tail -2 live_log'}
+						sh 'ansible-playbook deployment.yml -e NEXUS_ARTIFACT=${NEXUS_ARTIFACT} -v > live_log.txt || exit 1'
+						sh 'tail -2 live_log.txt'}
 				}}
-			post { always { archiveArtifacts artifacts: "ansible/live_log", fingerprint: true } }
+			post { always { archiveArtifacts artifacts: "ansible/live_log.txt", fingerprint: true } }
 		} 
 		stage('Deploy to EKS') {
 			agent { label 'agent1' }
