@@ -141,7 +141,7 @@ pipeline {
 			steps{
 				script{
 					dir('ansible'){
-						echo "${params.Deploy}"
+						echo "${params.AnsibleDeploy}"
 						sh 'ansible-playbook deployment.yml -e NEXUS_ARTIFACT=${NEXUS_ARTIFACT} > live_log || exit 1'
 						sh 'tail -2 live_log'}
 				}}} 
