@@ -1,4 +1,4 @@
-# **************************** Installation ********************************
+**************************** Installation ********************************
 # https://github.com/azka-begh/Jenkins-Nexus-SonarQube-Ansible-Setup.git
 *************************************************************************
 # Jenkins - Maven - JUnit - Checkstyle - SonarQube - Nexus - Docker - Trivy - ECR - Ansible - EKS
