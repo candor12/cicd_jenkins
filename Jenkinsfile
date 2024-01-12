@@ -1,20 +1,19 @@
 pipeline {
 	options {
-		buildDiscarder(logRotator(numToKeepStr: '3', artifactNumToKeepStr: '3'))
-                //skipDefaultCheckout() 
+		buildDiscarder(logRotator(numToKeepStr: '3'))
+                skipDefaultCheckout() 
                 disableConcurrentBuilds()
 	}
-	tools {
-        jdk "jdk-11" }
 	agent any
 	parameters {
-		booleanParam(name: "Deploy", defaultValue: false, description: "Deploy the Build")
-		booleanParam(name: "SonarQube", defaultValue: false, description: "ByPass SonarQube Scan")
+		booleanParam(name: "EksDeploy", defaultValue: false, description: "Deploy the Build to EKS")
+		booleanParam(name: "AnsibleDeploy", defaultValue: false, description: "Deploy the Build to Target Server using Ansible")
+		booleanParam(name: "SonarQube", defaultValue: false, description: "By-Pass SonarQube Scan")
 	}	
 	environment {
 		NEXUS_VERSION = "nexus3"
                 NEXUS_PROTOCOL = "http"	    
-                NEXUS_URL = "172.31.18.80:8081"
+                NEXUS_URL = "172.31.17.3:8081"
                 NEXUS_REPOSITORY = "team-artifacts"
 	        NEXUS_REPO_ID    = "team-artifacts"
                 NEXUS_CREDENTIAL_ID = "nexuslogin"
@@ -23,9 +22,13 @@ pipeline {
 	        scannerHome = tool 'sonar4.7'
 	        ecr_repo = '674583976178.dkr.ecr.us-east-2.amazonaws.com/teamimagerepo'
                 ecrCreds = 'awscreds'
-	        image = ''
+	        dockerImage = "${env.ecr_repo}:${env.BUILD_ID}"
 	}
 	stages{
+		stage('SCM Checkout'){
+			steps{
+				git branch: 'test-trivy', url: 'https://github.com/azka-begh/CICD-with-Jenkins.git'
+		}}
 		stage('Maven Build'){
 			steps {
 				sh 'mvn clean install -DskipTests'
@@ -36,14 +39,14 @@ pipeline {
 					sh 'mvn test'
 					junit allowEmptyResults: true, testResults: 'target/surefire-reports/*.xml'
 				}}}
-		stage ('Checkstyle Analysis'){
+		stage ('Checkstyle Analysis') {
 			steps {
 				script{
 					sh 'mvn checkstyle:checkstyle'
-					recordIssues enabledForFailure: false, tool: checkStyle()
 				}}}
 		stage('SonarQube Scan') {
 			when { not{ expression { return params.SonarQube  }}}
+			tools { jdk "jdk-11" }
 			steps {
 				script{
 					withSonarQubeEnv('sonar') {
@@ -60,11 +63,9 @@ pipeline {
 					echo "Waiting for Quality Gate"
 					timeout(time: 5, unit: 'MINUTES') {
 						def qualitygate = waitForQualityGate(webhookSecretId: 'sqwebhook')
-						if (qualitygate.status != "OK") {
-							catchError(buildResult: 'UNSTABLE', stageResult: 'FAILURE') {
-								sh "exit 1"  }}}
-				}}}
-		stage("Publish Artifact to Nexus") {
+						if (qualitygate.status != "OK") { catchError(buildResult: 'UNSTABLE', stageResult: 'FAILURE') { sh "exit 1"  } }}
+				}}} 
+		stage('Publish Artifact to Nexus') {
 			steps {
 				script {
 					pom = readMavenPom file: "pom.xml";
@@ -94,34 +95,58 @@ pipeline {
 					}
 					else {
 						error "*** File: ${artifactPath}, could not be found";
-					}}}}
+					}}}} 
 		stage('Docker Image Build') {
+			agent { label 'agent1' }
 			steps {
 				script {
+					git branch: 'test-trivy', url: 'https://github.com/azka-begh/CICD-with-Jenkins.git'
 					image = docker.build(ecr_repo + ":$BUILD_ID", "./") 
 				}}}
-		stage('Push Image to ECR'){
+		stage ('Trivy Scan') {
+			agent { label 'agent1' }
+			steps{
+				script {
+					 sh 'curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/html.tpl > ./html.tpl'
+                                         sh 'trivy image --format template --template \"@./html.tpl\" -o trivy.html --cache-dir ~/trivy/ --severity MEDIUM,HIGH,CRITICAL ${dockerImage}'
+				}}
+			post { always { archiveArtifacts artifacts: "trivy.html", fingerprint: true
+				                     publishHTML target : [
+							     allowMissing: true,
+							     alwaysLinkToLastBuild: true,
+							     keepAll: true,
+							     reportDir: './',
+							     reportFiles: 'trivy.html',
+							     reportName: 'Trivy Scan',
+							     reportTitles: 'Trivy Scan']
+				      }}
+		}		
+		stage('Push Image to ECR') {
+			agent { label 'agent1' }
 			steps {
 				script {
 					docker.withRegistry("https://" + ecr_repo, "ecr:us-east-2:" + ecrCreds) {
 						image.push("$BUILD_ID")
 						image.push('latest') }
 				}}
-			post { always { sh 'docker builder prune --all -f' } 
-			     }}
-		stage("Fetch from Nexus & Deploy using Ansible"){
+			post { success {
+				sh 'docker rmi -f ${dockerImage}'
+				sh 'docker builder prune --all -f'
+			} }
+		}
+		stage('Fetch from Nexus & Deploy using Ansible') {
 			agent { label 'agent1' }
-			when { expression { return params.Deploy }}
+			when { expression { return params.AnsibleDeploy }}
 			steps{
 				script{
 					dir('ansible'){
 						echo "${params.Deploy}"
 						sh 'ansible-playbook deployment.yml -e NEXUS_ARTIFACT=${NEXUS_ARTIFACT} > live_log || exit 1'
 						sh 'tail -2 live_log'}
-				}}}
-		stage('Deploy to EKS'){
+				}}} 
+		stage('Deploy to EKS') {
 			agent { label 'agent1' }
-			when { expression { return params.Deploy }}
+			when { expression { return params.EksDeploy }}
 			steps {
 				script{
 					dir('k8s'){
