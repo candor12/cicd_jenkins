@@ -144,7 +144,7 @@ pipeline {
 						sh 'ansible-playbook deployment.yml -e NEXUS_ARTIFACT=${NEXUS_ARTIFACT} > live_log || exit 1'
 						sh 'tail -2 live_log'}
 				}}
-			post { always { archiveArtifacts artifacts: "live_log", fingerprint: true } }
+			post { always { archiveArtifacts artifacts: "ansible/live_log", fingerprint: true } }
 		} 
 		stage('Deploy to EKS') {
 			agent { label 'agent1' }
