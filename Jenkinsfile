@@ -1,6 +1,6 @@
 pipeline {
 	options {
-		buildDiscarder(logRotator(numToKeepStr: '3'))
+		buildDiscarder(logRotator(numToKeepStr: '5'))
                 skipDefaultCheckout() 
                 disableConcurrentBuilds()
 	}
