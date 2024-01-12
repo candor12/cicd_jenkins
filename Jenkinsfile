@@ -27,7 +27,7 @@ pipeline {
 	stages{
 		stage('SCM Checkout'){
 			steps{
-				git branch: 'test-trivy', url: 'https://github.com/azka-begh/CICD-with-Jenkins.git'
+				git branch: 'master', url: 'https://github.com/azka-begh/CICD-with-Jenkins.git'
 		}}
 		stage('Maven Build'){
 			steps {
@@ -100,7 +100,7 @@ pipeline {
 			agent { label 'agent1' }
 			steps {
 				script {
-					git branch: 'test-trivy', url: 'https://github.com/azka-begh/CICD-with-Jenkins.git'
+					git branch: 'master', url: 'https://github.com/azka-begh/CICD-with-Jenkins.git'
 					image = docker.build(ecr_repo + ":$BUILD_ID", "./") 
 				}}}
 		stage ('Trivy Scan') {
