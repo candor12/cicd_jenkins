@@ -17,7 +17,6 @@ pipeline {
 		stage('Checkout SCM') {
 			steps {
 				git branch: branch, credentialsId: 'gitPAT', url: repoUrl
-				echo "${groupId}-${artifactId}-${pomVersion}-${packaging}"
 			}}
 		stage('Add Tag') {
 			steps {
