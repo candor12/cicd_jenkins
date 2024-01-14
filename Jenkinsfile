@@ -23,10 +23,7 @@ pipeline {
             }}
         }
        
-        stage('Build and deploy') {
-            ...
-        }
-        stage('Add Tag) {
+        stage('Add Tag') {
             steps {
                 withCredentials([[$class: 'UsernamePasswordMultiBinding',
                         credentialsId: 'gitPAT',
