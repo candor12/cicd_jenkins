@@ -6,7 +6,7 @@ pipeline {
 	environment {
         artifactId = readMavenPom().getArtifactId()    //Use Pipeline Utility Steps
         pomVersion = readMavenPom().getVersion()
-	gitTag = ${env.pomVersion}-${BUILD_TIMESTAMP}
+	gitTag = "${env.pomVersion}-${env.BUILD_TIMESTAMP}"
     }
     stages {
         stage('Checkout SCM') {
