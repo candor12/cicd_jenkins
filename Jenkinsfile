@@ -13,8 +13,6 @@ pipeline {
 		booleanParam(name: "Trivy", defaultValue: false, description: "By Pass Trivy Scan")
 	}	
 	environment {
-		//artifactId         = readMavenPom().getArtifactId()   
-		//pomVersion         = readMavenPom().getVersion()
 		branch               = 'nexus-mvn-deploy'
 		repoUrl              = 'https://github.com/candor12/cicd_jenkins.git'
 		gitCreds             = 'gitPAT'
