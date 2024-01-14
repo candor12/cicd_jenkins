@@ -19,10 +19,7 @@ pipeline {
 			}}
 		stage('Add Tag') {
 			steps {
-				withCredentials([[$class: 'UsernamePasswordMultiBinding',
-						  credentialsId: 'gitPAT',
-						  usernameVariable: 'GIT_USERNAME',
-						  passwordVariable: 'GIT_PASSWORD']]) {
+				withCredentials([usernamePassword(credentialsId: 'gitPAT',usernameVariable: 'GIT_USERNAME', passwordVariable: 'GIT_PASSWORD')]){
 					sh '''git tag ${gitTag}
                                         git push --tags 
 					echo "https://github.com/candor12/cicd_jenkins/tree/${gitTag}"
