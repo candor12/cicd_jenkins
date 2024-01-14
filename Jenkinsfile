@@ -71,7 +71,7 @@ pipeline {
 					NEXUS_ARTIFACT = artifactUrl.drop(19)
 					 
 					//#Uploading to nexus: }"
-					//echo "${NEXUS_ARTIFACT}"
+					echo "${NEXUS_ARTIFACT}"
 					}}}
 		stage('Add Tag to Repository') {
 			steps { withCredentials([usernamePassword(credentialsId: 'gitPAT',usernameVariable: 'GIT_USERNAME', passwordVariable: 'GIT_PASSWORD')]){
