@@ -25,7 +25,7 @@
 		<repository>
 			<id>team-artifacts</id>
 			<name>custom repository</name>
-			<url>http://172.31.18.80:8081/repository/team-artifacts</url>
+			<url>http://172.31.17.3:8081/repository/team-artifacts</url>
 		</repository>
 	</distributionManagement> 
 	<dependencies>
