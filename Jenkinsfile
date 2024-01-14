@@ -15,7 +15,7 @@ pipeline {
 	environment {
 		//artifactId         = readMavenPom().getArtifactId()   
 		//pomVersion         = readMavenPom().getVersion()
-		branch               = 'master'
+		branch               = 'nexus-mvn-deploy'
 		repoUrl              = 'https://github.com/candor12/cicd_jenkins.git'
 		gitCreds             = 'gitPAT'
 		gitTag               = "${env.pomVersion}-${env.BUILD_TIMESTAMP}"
