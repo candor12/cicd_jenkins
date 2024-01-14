@@ -24,7 +24,7 @@ pipeline {
 	        NEXUS_REPO_ID        = "team-artifacts"
                 NEXUS_CREDENTIAL_ID  = "nexuslogin"
                 ARTVERSION           = "${env.BUILD_ID}-${env.BUILD_TIMESTAMP}"
-	        NEXUS_ARTIFACT       = "${env.NEXUS_PROTOCOL}://${env.NEXUS_URL}/repository/${env.NEXUS_REPOSITORY}/com/team/project/tmart/${env.ARTVERSION}/tmart-${env.ARTVERSION}.war"
+	       // NEXUS_ARTIFACT       = "${env.NEXUS_PROTOCOL}://${env.NEXUS_URL}/repository/${env.NEXUS_REPOSITORY}/com/team/project/tmart/${env.ARTVERSION}/tmart-${env.ARTVERSION}.war"
 	        scannerHome          = tool 'sonar4.7'
 	        ecr_repo             = '674583976178.dkr.ecr.us-east-2.amazonaws.com/teamimagerepo'
                 ecrCreds             = 'awscreds'
@@ -66,7 +66,7 @@ pipeline {
 			steps {
 				script {
 					sh "mvn deploy -DskipTests -Dmaven.install.skip=true > nexus.log"
-					def artifactUrl=$(tail -20 nexus.log | grep ".war" nexus.log | grep -v INFO | grep -v Uploaded) 
+					def artifactUrl=sh(script: 'tail -20 nexus.log | grep ".war" nexus.log | grep -v INFO | grep -v Uploaded') 
 					NEXUS_ARTIFACT = sh(script: echo "${artifactUrl#Uploading to nexus: }")
 					echo "${NEXUS_ARTIFACT}"
 					}}}
