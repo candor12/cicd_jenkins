@@ -4,7 +4,7 @@
 	<groupId>com.team.project</groupId>
 	<artifactId>tmart</artifactId>
 	<packaging>war</packaging>
-	<version>v4.0</version>
+	<version>v8.1-SNAPSHOT</version>
 	<name>Team Project</name>
 	<url>http://maven.apache.org</url>
 	<properties>
