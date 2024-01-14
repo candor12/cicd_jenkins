@@ -9,30 +9,33 @@ pipeline {
 	parameters {
 		booleanParam(name: "EksDeploy", defaultValue: false, description: "Deploy the Build to EKS")
 		booleanParam(name: "AnsibleDeploy", defaultValue: false, description: "Deploy the Build to Target Server using Ansible")
-		booleanParam(name: "SonarQube", defaultValue: false, description: "By-Pass SonarQube Scan")
+		booleanParam(name: "SonarQube", defaultValue: false, description: "By Pass SonarQube Scan")
+		booleanParam(name: "Trivy", defaultValue: false, description: "By Pass Trivy Scan")
 	}	
 	environment {
-		//artifactId = readMavenPom().getArtifactId()   
-		//pomVersion = readMavenPom().getVersion()
-		//gitCreds   = 'gitPAT'
-		//gitTag     = "${env.pomVersion}-${env.BUILD_TIMESTAMP}"
-		NEXUS_VERSION = "nexus3"
-                NEXUS_PROTOCOL = "http"	    
-                NEXUS_URL = "172.31.17.3:8081"
-                NEXUS_REPOSITORY = "team-artifacts"
-	        NEXUS_REPO_ID    = "team-artifacts"
-                NEXUS_CREDENTIAL_ID = "nexuslogin"
-                ARTVERSION = "${env.BUILD_ID}-${env.BUILD_TIMESTAMP}"
-	        NEXUS_ARTIFACT = "${env.NEXUS_PROTOCOL}://${env.NEXUS_URL}/repository/${env.NEXUS_REPOSITORY}/com/team/project/tmart/${env.ARTVERSION}/tmart-${env.ARTVERSION}.war"
-	        scannerHome = tool 'sonar4.7'
-	        ecr_repo = '674583976178.dkr.ecr.us-east-2.amazonaws.com/teamimagerepo'
-                ecrCreds = 'awscreds'
-	        dockerImage = "${env.ecr_repo}:${env.BUILD_ID}"
+		//artifactId         = readMavenPom().getArtifactId()   
+		//pomVersion         = readMavenPom().getVersion()
+		branch               = 'master'
+		repoUrl              = 'https://github.com/candor12/cicd_jenkins.git'
+		gitCreds             = 'gitPAT'
+		gitTag               = "${env.pomVersion}-${env.BUILD_TIMESTAMP}"
+		NEXUS_VERSION        = "nexus3"
+                NEXUS_PROTOCOL       = "http"	    
+                NEXUS_URL            = "172.31.17.3:8081"
+                NEXUS_REPOSITORY     = "team-artifacts"
+	        NEXUS_REPO_ID        = "team-artifacts"
+                NEXUS_CREDENTIAL_ID  = "nexuslogin"
+                ARTVERSION           = "${env.BUILD_ID}-${env.BUILD_TIMESTAMP}"
+	        NEXUS_ARTIFACT       = "${env.NEXUS_PROTOCOL}://${env.NEXUS_URL}/repository/${env.NEXUS_REPOSITORY}/com/team/project/tmart/${env.ARTVERSION}/tmart-${env.ARTVERSION}.war"
+	        scannerHome          = tool 'sonar4.7'
+	        ecr_repo             = '674583976178.dkr.ecr.us-east-2.amazonaws.com/teamimagerepo'
+                ecrCreds             = 'awscreds'
+	        dockerImage          = "${env.ecr_repo}:${env.BUILD_ID}"
 	}
 	stages{
 		stage('SCM Checkout'){
 			steps{
-				git branch: 'master', url: 'https://github.com/azka-begh/CICD-with-Jenkins.git'
+				git branch: branch, url: repoUrl, credentialsId: 'gitPAT'
 		}}
 		stage('Maven Build'){
 			steps {
@@ -46,7 +49,7 @@ pipeline {
 				}}}
 		stage ('Checkstyle Analysis') {
 			steps {
-				script{
+				script {
 					sh 'mvn checkstyle:checkstyle'
 				}}}
 		stage('SonarQube Scan') {
@@ -100,7 +103,16 @@ pipeline {
 					}
 					else {
 						error "*** File: ${artifactPath}, could not be found";
-					}}}} 
+					}}}}
+		stage('Add Tag to Repository') {
+			steps { withCredentials([usernamePassword(credentialsId: 'gitPAT',usernameVariable: 'GIT_USERNAME', passwordVariable: 'GIT_PASSWORD')]){
+				sh '''
+                                git tag ${gitTag}
+                                git push --tags 
+				'''
+				echo "Tag pushed to repository: ${gitTag}" 
+				}}
+		} 
 		stage('Docker Image Build') {
 			agent { label 'agent1' }
 			steps {
@@ -110,20 +122,15 @@ pipeline {
 				}}}
 		stage ('Trivy Scan') {
 			agent { label 'agent1' }
+			when { not{ expression { return params.Trivy  }}}
 			steps{
 				script {
 					 sh 'curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/html.tpl > ./html.tpl'
 				         sh 'trivy image --skip-db-update --skip-java-db-update --cache-dir ~/trivy/ --format template --template \"@./html.tpl\" -o trivy.html --severity MEDIUM,HIGH,CRITICAL ${dockerImage}' 
 				}}
 			post { always { archiveArtifacts artifacts: "trivy.html", fingerprint: true
-				                     publishHTML target : [
-							     allowMissing: true,
-							     alwaysLinkToLastBuild: true,
-							     keepAll: true,
-							     reportDir: './',
-							     reportFiles: 'trivy.html',
-							     reportName: 'Trivy Scan',
-							     reportTitles: 'Trivy Scan']
+				                     publishHTML target : [allowMissing: true, alwaysLinkToLastBuild: true, keepAll: true,
+									   reportDir: './', reportFiles: 'trivy.html', reportName: 'Trivy Scan', reportTitles: 'Trivy Scan']
 				      }}
 		}		
 		stage('Push Image to ECR') {
