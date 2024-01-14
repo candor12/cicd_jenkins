@@ -23,16 +23,16 @@
 		<maven.build.timestamp.format>yy.MM.dd.HH.mm.ss</maven.build.timestamp.format>
 	</properties>
 	<distributionManagement>
-		<repository>
+	<!	<repository>
 			<id>nexus</id>
 			<name>team-artifacts</name>
 			<url>http://172.31.18.80:8081/repository/team-artifacts</url>
-		</repository>
-		<releaserepository>
+		</repository> !>
+		<repository>
 			<id>nexus</id>
 			<name>nexus-release</name>
 			<url>http://172.31.18.80:8081/repository/maven-releases</url>
-		</releaserepository>
+		</repository>
 		<snapshotRepository>
 			<id>nexus</id>
 			<name>nexus-snapshot</name>
