@@ -13,10 +13,11 @@ pipeline {
 		booleanParam(name: "Trivy", defaultValue: false, description: "By Pass Trivy Scan")
 	}	
 	environment {
+		pomVersion           = sh(returnStdout: true, script: 'mvn -DskipTests help:evaluate -Dexpression=project.version -q -DforceStdout')
 		branch               = 'nexus-mvn-deploy'
 		repoUrl              = 'https://github.com/candor12/cicd_jenkins.git'
 		gitCreds             = 'gitPAT'
-		gitTag               = 'sh(returnStdout: true, script: 'mvn -DskipTests help:evaluate -Dexpression=project.version -q -DforceStdout')+"-${env.BUILD_TIMESTAMP}"'
+		gitTag               = "${env.pomVersion}-${env.BUILD_TIMESTAMP}"'
 		NEXUS_VERSION        = "nexus3"
                 NEXUS_PROTOCOL       = "http"	    
                 NEXUS_URL            = "172.31.17.3:8081"
@@ -24,12 +25,10 @@ pipeline {
 	        NEXUS_REPO_ID        = "team-artifacts"
                 NEXUS_CREDENTIAL_ID  = "nexuslogin"
                 ARTVERSION           = "${env.BUILD_ID}-${env.BUILD_TIMESTAMP}"
-	       // NEXUS_ARTIFACT       = "${env.NEXUS_PROTOCOL}://${env.NEXUS_URL}/repository/${env.NEXUS_REPOSITORY}/com/team/project/tmart/${env.ARTVERSION}/tmart-${env.ARTVERSION}.war"
 	        scannerHome          = tool 'sonar4.7'
 	        ecr_repo             = '674583976178.dkr.ecr.us-east-2.amazonaws.com/teamimagerepo'
                 ecrCreds             = 'awscreds'
 	        dockerImage          = "${env.ecr_repo}:${env.BUILD_ID}"
-		//pomVersion           = sh(returnStdout: true, script: 'mvn -DskipTests help:evaluate -Dexpression=project.version -q -DforceStdout')
 		NEXUS_ARTIFACT       = ''
 	}
 	stages{
