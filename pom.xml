@@ -245,6 +245,6 @@
 				<version>3.0.1</version>
 			</plugin>
 		</plugins>
-		<finalName>${project.artifactId}-${project.version}-${maven.build.timestamp}</finalName>
+		<finalName>${project.artifactId}-${project.version}-${maven.build.timestamp.format}</finalName>
 	</build>
 </project>
