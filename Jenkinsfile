@@ -1,4 +1,3 @@
-def branch = '${env.BRANCH_NAME}'
 def repoUrl = 'https://github.com/candor12/cicd_jenkins.git'
 
 pipeline {
@@ -7,6 +6,7 @@ pipeline {
 		 skipDefaultCheckout() 
 	}
 	environment {
+		def branch = '${env.BRANCH_NAME}'
 		//artifactId = readMavenPom().getArtifactId()    //Use Pipeline Utility Steps
 		//pomVersion = readMavenPom().getVersion()
 		def pomVersion = sh(returnStdout: true, script: 'mvn -DskipTests help:evaluate -Dexpression=project.version -q -DforceStdout')
