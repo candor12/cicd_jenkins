@@ -76,7 +76,7 @@ pipeline {
 		stage('Publish Artifact to Nexus') {
 			steps {
 				script {
-					mvn deploy -DskipTests -Dmaven.install.skip=true
+					sh "mvn deploy -DskipTests -Dmaven.install.skip=true"
 					echo ${NEXUS_ARTIFACT}
 					}}}
 		stage('Add Tag to Repository') {
