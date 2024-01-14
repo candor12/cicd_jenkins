@@ -29,10 +29,10 @@ pipeline {
                         credentialsId: 'gitPAT',
                         usernameVariable: 'GIT_USERNAME',
                         passwordVariable: 'GIT_PASSWORD']]) {
-                    sh '''
+                  /*  sh '''
                         git config --global credential.username $GIT_USERNAME
                         git config --global credential.helper '!f() { echo password=$GIT_PASSWORD; }; f'
-                    '''
+                    ''' */
                     sh """
                         git tag ${gitTag}
                         git push ${repoUrl} --tags
