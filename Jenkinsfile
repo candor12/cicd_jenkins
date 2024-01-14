@@ -16,7 +16,7 @@ pipeline {
 		branch               = 'nexus-mvn-deploy'
 		repoUrl              = 'https://github.com/candor12/cicd_jenkins.git'
 		gitCreds             = 'gitPAT'
-		gitTag               = "${env.pomVersion}-${env.BUILD_TIMESTAMP}"
+		gitTag               = sh(returnStdout: true, script: 'mvn -DskipTests help:evaluate -Dexpression=project.version -q -DforceStdout')+"-${env.BUILD_TIMESTAMP}"
 		NEXUS_VERSION        = "nexus3"
                 NEXUS_PROTOCOL       = "http"	    
                 NEXUS_URL            = "172.31.17.3:8081"
@@ -29,7 +29,7 @@ pipeline {
 	        ecr_repo             = '674583976178.dkr.ecr.us-east-2.amazonaws.com/teamimagerepo'
                 ecrCreds             = 'awscreds'
 	        dockerImage          = "${env.ecr_repo}:${env.BUILD_ID}"
-		pomVersion           = sh(returnStdout: true, script: 'mvn -DskipTests help:evaluate -Dexpression=project.version -q -DforceStdout')
+		//pomVersion           = sh(returnStdout: true, script: 'mvn -DskipTests help:evaluate -Dexpression=project.version -q -DforceStdout')
 		NEXUS_ARTIFACT       = ''
 	}
 	stages{
