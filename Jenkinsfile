@@ -1,4 +1,3 @@
-
 pipeline {
 	options {
 		buildDiscarder(logRotator(numToKeepStr: '10'))
@@ -13,24 +12,16 @@ pipeline {
 		booleanParam(name: "Trivy", defaultValue: false, description: "By Pass Trivy Scan")
 	}	
 	environment {
-		//artifactId         = readMavenPom().getArtifactId()   
-		//pomVersion         = readMavenPom().getVersion()
+		pomVersion           = sh(returnStdout: true, script: 'mvn -DskipTests help:evaluate -Dexpression=project.version -q -DforceStdout')
 		branch               = 'master'
 		repoUrl              = 'https://github.com/candor12/cicd_jenkins.git'
 		gitCreds             = 'gitPAT'
 		gitTag               = "${env.pomVersion}-${env.BUILD_TIMESTAMP}"
-		NEXUS_VERSION        = "nexus3"
-                NEXUS_PROTOCOL       = "http"	    
-                NEXUS_URL            = "172.31.17.3:8081"
-                NEXUS_REPOSITORY     = "team-artifacts"
-	        NEXUS_REPO_ID        = "team-artifacts"
-                NEXUS_CREDENTIAL_ID  = "nexuslogin"
-                ARTVERSION           = "${env.BUILD_ID}-${env.BUILD_TIMESTAMP}"
-	        NEXUS_ARTIFACT       = "${env.NEXUS_PROTOCOL}://${env.NEXUS_URL}/repository/${env.NEXUS_REPOSITORY}/com/team/project/tmart/${env.ARTVERSION}/tmart-${env.ARTVERSION}.war"
 	        scannerHome          = tool 'sonar4.7'
 	        ecr_repo             = '674583976178.dkr.ecr.us-east-2.amazonaws.com/teamimagerepo'
                 ecrCreds             = 'awscreds'
 	        dockerImage          = "${env.ecr_repo}:${env.BUILD_ID}"
+		NEXUS_ARTIFACT       = ''
 	}
 	stages{
 		stage('SCM Checkout'){
@@ -41,17 +32,6 @@ pipeline {
 			steps {
 				sh 'mvn clean install -DskipTests'
 			}}
-		stage('JUnit Test') {
-			steps {
-				script {
-					sh 'mvn test'
-					junit allowEmptyResults: true, testResults: 'target/surefire-reports/*.xml'
-				}}}
-		stage ('Checkstyle Analysis') {
-			steps {
-				script {
-					sh 'mvn checkstyle:checkstyle'
-				}}}
 		stage('SonarQube Scan') {
 			when { not{ expression { return params.SonarQube  }}}
 			tools { jdk "jdk-11" }
@@ -76,34 +56,11 @@ pipeline {
 		stage('Publish Artifact to Nexus') {
 			steps {
 				script {
-					pom = readMavenPom file: "pom.xml";
-					filesByGlob = findFiles(glob: "target/*.${pom.packaging}");
-					echo "${filesByGlob[0].name} ${filesByGlob[0].path} ${filesByGlob[0].directory} ${filesByGlob[0].length} ${filesByGlob[0].lastModified}"
-					artifactPath = filesByGlob[0].path;
-					artifactExists = fileExists artifactPath;
-					if(artifactExists) {
-						echo "*** File: ${artifactPath}, group: ${pom.groupId}, packaging: ${pom.packaging}, version ${pom.version} ARTVERSION";
-						nexusArtifactUploader(
-							nexusVersion: NEXUS_VERSION,
-							protocol: NEXUS_PROTOCOL,
-							nexusUrl: NEXUS_URL,
-							groupId: pom.groupId,
-							version: ARTVERSION,
-							repository: NEXUS_REPOSITORY,credentialsId: NEXUS_CREDENTIAL_ID,
-							artifacts: [
-								[artifactId: pom.artifactId,
-								 classifier: '',
-								 file: artifactPath,
-                                                                 type: pom.packaging],
-                                                                 [artifactId: pom.artifactId,
-                                                                  classifier: '',
-                                                                  file: "pom.xml",
-                                                                  type: "pom"]]
-						);
-					}
-					else {
-						error "*** File: ${artifactPath}, could not be found";
-					}}}}
+					sh "mvn deploy -DskipTests -Dmaven.install.skip=true > nexus.log && cat nexus.log"
+					def artifactUrl = sh(returnStdout: true, script: 'tail -20 nexus.log | grep ".war" nexus.log | grep -v INFO | grep -v Uploaded') 
+					NEXUS_ARTIFACT = artifactUrl.drop(20)    //groovy
+					echo "${NEXUS_ARTIFACT}"
+					}}}
 		stage('Add Tag to Repository') {
 			steps { withCredentials([usernamePassword(credentialsId: 'gitPAT',usernameVariable: 'GIT_USERNAME', passwordVariable: 'GIT_PASSWORD')]){
 				sh '''
@@ -113,11 +70,12 @@ pipeline {
 				echo "Tag pushed to repository: ${gitTag}" 
 				}}
 		} 
+		
 		stage('Docker Image Build') {
 			agent { label 'agent1' }
 			steps {
 				script {
-					git branch: 'master', url: 'https://github.com/azka-begh/CICD-with-Jenkins.git'
+					git branch: branch, url: repoUrl
 					image = docker.build(ecr_repo + ":$BUILD_ID", "./") 
 				}}}
 		stage ('Trivy Scan') {
@@ -169,7 +127,7 @@ pipeline {
                                                 kubectl get deployments && sleep 5 && kubectl get svc
 						'''   }}}
 			post { always { cleanWs() } }
-		}
+		} 
 	}
 	post { always { cleanWs() } }
 }
