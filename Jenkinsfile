@@ -30,6 +30,7 @@ pipeline {
                 ecrCreds             = 'awscreds'
 	        dockerImage          = "${env.ecr_repo}:${env.BUILD_ID}"
 		pomVersion           = sh(returnStdout: true, script: 'mvn -DskipTests help:evaluate -Dexpression=project.version -q -DforceStdout')
+		NEXUS_ARTIFACT       = ''
 	}
 	stages{
 		stage('SCM Checkout'){
@@ -64,7 +65,9 @@ pipeline {
 		stage('Publish Artifact to Nexus') {
 			steps {
 				script {
-					sh "mvn deploy -DskipTests -Dmaven.install.skip=true"
+					sh "mvn deploy -DskipTests -Dmaven.install.skip=true > nexus.log"
+					def artifactUrl=$(tail -20 nexus.log | grep ".war" nexus.log | grep -v INFO | grep -v Uploaded) 
+					NEXUS_ARTIFACT = sh(script: echo "${artifactUrl#Uploading to nexus: }")
 					echo "${NEXUS_ARTIFACT}"
 					}}}
 		stage('Add Tag to Repository') {
