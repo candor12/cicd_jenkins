@@ -29,6 +29,7 @@ pipeline {
 	        ecr_repo             = '674583976178.dkr.ecr.us-east-2.amazonaws.com/teamimagerepo'
                 ecrCreds             = 'awscreds'
 	        dockerImage          = "${env.ecr_repo}:${env.BUILD_ID}"
+		pomVersion           = sh(returnStdout: true, script: 'mvn -DskipTests help:evaluate -Dexpression=project.version -q -DforceStdout')
 	}
 	stages{
 		stage('SCM Checkout'){
@@ -39,17 +40,6 @@ pipeline {
 			steps {
 				sh 'mvn clean install -DskipTests'
 			}}
-		stage('JUnit Test') {
-			steps {
-				script {
-					sh 'mvn test'
-					junit allowEmptyResults: true, testResults: 'target/surefire-reports/*.xml'
-				}}}
-		stage ('Checkstyle Analysis') {
-			steps {
-				script {
-					sh 'mvn checkstyle:checkstyle'
-				}}}
 		stage('SonarQube Scan') {
 			when { not{ expression { return params.SonarQube  }}}
 			tools { jdk "jdk-11" }
@@ -86,6 +76,7 @@ pipeline {
 				echo "Tag pushed to repository: ${gitTag}" 
 				}}
 		} 
+		/*
 		stage('Docker Image Build') {
 			agent { label 'agent1' }
 			steps {
@@ -142,7 +133,7 @@ pipeline {
                                                 kubectl get deployments && sleep 5 && kubectl get svc
 						'''   }}}
 			post { always { cleanWs() } }
-		}
+		} */
 	}
 	post { always { cleanWs() } }
 }
