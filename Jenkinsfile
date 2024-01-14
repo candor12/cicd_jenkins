@@ -1,10 +1,10 @@
 def branch = 'Tag'
 def repoUrl = 'https://github.com/candor12/cicd_jenkins.git'
 
-def pomVersion = sh script: 'mvn -DskipTests help:evaluate -Dexpression=project.version -q -DforceStdout', returnStdout: true;
-def artifactId = sh script: 'mvn -DskipTests help:evaluate -Dexpression=project.artifactId -q -DforceStdout', returnStdout: true;
-def groupId = sh script: 'mvn -DskipTests help:evaluate -Dexpression=project.groupId -q -DforceStdout', returnStdout: true;
-def packaging = sh script: 'mvn -DskipTests help:evaluate -Dexpression=project.packaging -q -DforceStdout', returnStdout: true;
+/*def pomVersion = sh(returnStdout: true, script: 'mvn -DskipTests help:evaluate -Dexpression=project.version -q -DforceStdout')
+def artifactId = sh(returnStdout: true, script: 'mvn -DskipTests help:evaluate -Dexpression=project.artifactId -q -DforceStdout')
+def groupId = sh(returnStdout: true, script: 'mvn -DskipTests help:evaluate -Dexpression=project.groupId -q -DforceStdout')
+def packaging = sh(returnStdout: true, script: 'mvn -DskipTests help:evaluate -Dexpression=project.packaging -q -DforceStdout')*/
 
 pipeline {
 	agent any
@@ -14,6 +14,10 @@ pipeline {
 	environment {
 		//artifactId = readMavenPom().getArtifactId()    //Use Pipeline Utility Steps
 		//pomVersion = readMavenPom().getVersion()
+		def pomVersion = sh(returnStdout: true, script: 'mvn -DskipTests help:evaluate -Dexpression=project.version -q -DforceStdout')
+		def artifactId = sh(returnStdout: true, script: 'mvn -DskipTests help:evaluate -Dexpression=project.artifactId -q -DforceStdout')
+		def groupId = sh(returnStdout: true, script: 'mvn -DskipTests help:evaluate -Dexpression=project.groupId -q -DforceStdout')
+		def packaging = sh(returnStdout: true, script: 'mvn -DskipTests help:evaluate -Dexpression=project.packaging -q -DforceStdout')
 		gitTag = "${env.pomVersion}-${env.BUILD_TIMESTAMP}"
 		gitCreds = 'gitPAT'
 	}
