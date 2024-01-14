@@ -17,7 +17,7 @@ pipeline {
 		branch               = 'nexus-mvn-deploy'
 		repoUrl              = 'https://github.com/candor12/cicd_jenkins.git'
 		gitCreds             = 'gitPAT'
-		gitTag               = "${env.pomVersion}-${env.BUILD_TIMESTAMP}"'
+		gitTag               = "${env.pomVersion}-${env.BUILD_TIMESTAMP}"
 		NEXUS_VERSION        = "nexus3"
                 NEXUS_PROTOCOL       = "http"	    
                 NEXUS_URL            = "172.31.17.3:8081"
