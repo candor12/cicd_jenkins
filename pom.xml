@@ -23,10 +23,20 @@
 	</properties>
 	<distributionManagement>
 		<repository>
-			<id>team-artifacts</id>
-			<name>custom repository</name>
+			<id>nexus</id>
+			<name>team-artifacts</name>
 			<url>http://172.31.18.80:8081/repository/team-artifacts</url>
 		</repository>
+		<repository>
+			<id>nexus</id>
+			<name>nexus-release</name>
+			<url>http://172.31.18.80:8081/repository/maven-releases</url>
+		</repository>
+		<snapshotRepository>
+			<id>nexus</id>
+			<name>nexus-snapshot</name>
+			<url>http://172.31.18.80:8081/repository/maven-snapshots</url>
+		</snapshotRepository>
 	</distributionManagement> 
 	<dependencies>
 		<dependency>
