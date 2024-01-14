@@ -76,7 +76,7 @@ pipeline {
 		stage('Publish Artifact to Nexus') {
 			steps {
 				script {
-					mvn deploy -DskipTests -Dmaven.install.skip=true
+					mvn deploy -DskipTests -DskipInstall
 					}}}
 		stage('Add Tag to Repository') {
 			steps { withCredentials([usernamePassword(credentialsId: 'gitPAT',usernameVariable: 'GIT_USERNAME', passwordVariable: 'GIT_PASSWORD')]){
