@@ -68,7 +68,9 @@ pipeline {
 					sh "mvn deploy -DskipTests -Dmaven.install.skip=true > nexus.log && cat nexus.log"
 					def artifactUrl = sh(returnStdout: true, script: 'tail -20 nexus.log | grep ".war" nexus.log | grep -v INFO | grep -v Uploaded') 
 					//NEXUS_ARTIFACT  = sh(returnStdout: true, script: 
-					 echo "${artifactUrl}"
+					echo "${artifactUrl}"
+					NEXUS_ARTIFACT = artifactUrl.drop(19)
+					 
 					//#Uploading to nexus: }"
 					//echo "${NEXUS_ARTIFACT}"
 					}}}
