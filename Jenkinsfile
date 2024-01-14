@@ -1,5 +1,5 @@
 def branch = 'Tag'
-def repoUrl = 'https://github.com/azka-begh/cicd_jenkins.git'
+def repoUrl = 'https://github.com/candor12/cicd_jenkins.git'
 
 
 pipeline {
