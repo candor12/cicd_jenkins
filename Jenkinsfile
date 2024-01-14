@@ -16,7 +16,7 @@ pipeline {
 	stages {
 		stage('Checkout SCM') {
 			steps {
-				git branch: branch, credentialsId: 'gitPAT', url: 'repoUrl'
+				git branch: branch, credentialsId: 'gitPAT', url: repoUrl
 			}}
 		stage('Add Tag') {
 			steps {
