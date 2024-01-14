@@ -12,6 +12,10 @@ pipeline {
 		booleanParam(name: "SonarQube", defaultValue: false, description: "By-Pass SonarQube Scan")
 	}	
 	environment {
+		//artifactId = readMavenPom().getArtifactId()   
+		//pomVersion = readMavenPom().getVersion()
+		//gitCreds   = 'gitPAT'
+		//gitTag     = "${env.pomVersion}-${env.BUILD_TIMESTAMP}"
 		NEXUS_VERSION = "nexus3"
                 NEXUS_PROTOCOL = "http"	    
                 NEXUS_URL = "172.31.17.3:8081"
