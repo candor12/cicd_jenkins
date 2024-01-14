@@ -1,10 +1,5 @@
-def branch = 'Tag'
+def branch = '${env.BRANCH_NAME}'
 def repoUrl = 'https://github.com/candor12/cicd_jenkins.git'
-
-/*def pomVersion = sh(returnStdout: true, script: 'mvn -DskipTests help:evaluate -Dexpression=project.version -q -DforceStdout')
-def artifactId = sh(returnStdout: true, script: 'mvn -DskipTests help:evaluate -Dexpression=project.artifactId -q -DforceStdout')
-def groupId = sh(returnStdout: true, script: 'mvn -DskipTests help:evaluate -Dexpression=project.groupId -q -DforceStdout')
-def packaging = sh(returnStdout: true, script: 'mvn -DskipTests help:evaluate -Dexpression=project.packaging -q -DforceStdout')*/
 
 pipeline {
 	agent any
