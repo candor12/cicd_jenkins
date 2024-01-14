@@ -1,30 +1,35 @@
 def branch = 'Tag'
-def repoUrl = 'https://github.com/azka-begh/cicd-with-jenkins.git'
+def repoUrl = 'https://github.com/candor12/cicd_jenkins.git'
 
 pipeline {
     agent any
+	environment {
+        artifactId = readMavenPom().getArtifactId()    //Use Pipeline Utility Steps
+        pomVersion = readMavenPom().getVersion()
+	gitTag = ${env.VERSION}-${BUILD_TIMESTAMP}
+    }
     stages {
-        stage('Checkout example-app') {
+        stage('Checkout SCM') {
             steps {
 		    script{
                      git branch: branch,
-                     credentialsId: 'gitCred',
+                     credentialsId: 'gitPAT',
                      url: repoUrl
-		    currentDateTime = sh script: """
-                        date +"-%Y%m%d_%H%M"
-                        """.trim(), returnStdout: true
-                    version = currentDateTime.trim()  // the .trim() is necessary
-                    echo "version: " + version
+		     echo "version: ${gitTag}" 
+		    
+		   // currentDateTime = sh script: """ date +"-%Y%m%d_%H%M" """.trim(), returnStdout: true
+                  //  version = currentDateTime.trim()  // the .trim() is necessary
+                    
             }}
         }
        
         stage('Build and deploy') {
             ...
         }
-        stage('Adding the version to the latest commit as a tag') {
+        stage('Add Tag) {
             steps {
                 withCredentials([[$class: 'UsernamePasswordMultiBinding',
-                        credentialsId: 'gitCred',
+                        credentialsId: 'gitPAT',
                         usernameVariable: 'GIT_USERNAME',
                         passwordVariable: 'GIT_PASSWORD']]) {
                     sh '''
@@ -32,7 +37,7 @@ pipeline {
                         git config --global credential.helper '!f() { echo password=$GIT_PASSWORD; }; f'
                     '''
                     sh """
-                        git tag ${version}
+                        git tag ${gitTag}
                         git push ${repoUrl} --tags
                     """
                 }
