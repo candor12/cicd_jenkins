@@ -6,12 +6,12 @@ pipeline {
 	environment {
 		branch     = 'Tag'
 		repoUrl    = 'https://github.com/candor12/cicd_jenkins.git'
-		gitTag     = "${env.pomVersion}-${env.BUILD_TIMESTAMP}"
 		gitCreds   = 'gitPAT'
 		artifactId = sh(returnStdout: true, script: 'mvn -DskipTests help:evaluate -Dexpression=project.artifactId -q -DforceStdout')
 		groupId    = sh(returnStdout: true, script: 'mvn -DskipTests help:evaluate -Dexpression=project.groupId -q -DforceStdout')
 		pomVersion = sh(returnStdout: true, script: 'mvn -DskipTests help:evaluate -Dexpression=project.version -q -DforceStdout')
 		packaging  = sh(returnStdout: true, script: 'mvn -DskipTests help:evaluate -Dexpression=project.packaging -q -DforceStdout')
+		gitTag     = "${env.pomVersion}-${env.BUILD_TIMESTAMP}"
 	}
 	stages {
 		stage('Checkout SCM') {
