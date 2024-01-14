@@ -1,4 +1,3 @@
-
 pipeline {
 	options {
 		buildDiscarder(logRotator(numToKeepStr: '10'))
@@ -18,13 +17,6 @@ pipeline {
 		repoUrl              = 'https://github.com/candor12/cicd_jenkins.git'
 		gitCreds             = 'gitPAT'
 		gitTag               = "${env.pomVersion}-${env.BUILD_TIMESTAMP}"
-		NEXUS_VERSION        = "nexus3"
-                NEXUS_PROTOCOL       = "http"	    
-                NEXUS_URL            = "172.31.17.3:8081"
-                NEXUS_REPOSITORY     = "team-artifacts"
-	        NEXUS_REPO_ID        = "team-artifacts"
-                NEXUS_CREDENTIAL_ID  = "nexuslogin"
-                ARTVERSION           = "${env.BUILD_ID}-${env.BUILD_TIMESTAMP}"
 	        scannerHome          = tool 'sonar4.7'
 	        ecr_repo             = '674583976178.dkr.ecr.us-east-2.amazonaws.com/teamimagerepo'
                 ecrCreds             = 'awscreds'
@@ -76,15 +68,14 @@ pipeline {
                                 git push --tags 
 				'''
 				echo "Tag pushed to repository: ${gitTag}" 
-				echo "${NEXUS_ARTIFACT}"
 				}}
 		} 
-		/*
+		
 		stage('Docker Image Build') {
 			agent { label 'agent1' }
 			steps {
 				script {
-					git branch: 'master', url: 'https://github.com/azka-begh/CICD-with-Jenkins.git'
+					git branch: branch, url: repoUrl
 					image = docker.build(ecr_repo + ":$BUILD_ID", "./") 
 				}}}
 		stage ('Trivy Scan') {
@@ -136,7 +127,7 @@ pipeline {
                                                 kubectl get deployments && sleep 5 && kubectl get svc
 						'''   }}}
 			post { always { cleanWs() } }
-		} */
+		} 
 	}
 	post { always { cleanWs() } }
 }
