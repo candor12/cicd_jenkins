@@ -1,4 +1,4 @@
-def NEXUS_ARTIFACT       = ''
+def NEXUS_ARTIFACT  =   ''
 pipeline {
 	options {
 		buildDiscarder(logRotator(numToKeepStr: '10'))
@@ -60,9 +60,7 @@ pipeline {
 					sh "mvn deploy -DskipTests -Dmaven.install.skip=true > nexus.log && cat nexus.log"
 					def artifactUrl = sh(returnStdout: true, script: 'tail -20 nexus.log | grep ".war" nexus.log | grep -v INFO | grep -v Uploaded') 
 					NEXUS_ARTIFACT = artifactUrl.drop(20)    //groovy
-					echo "${NEXUS_ARTIFACT}"
-					//env.NEXUS_ARTIFACT = sh(returnStdout: true, script: 'echo "$NEXUS_ARTIFACT"')
-					//echo "${env.NEXUS_ARTIFACT}"
+					echo "Artifact URL: ${NEXUS_ARTIFACT}"
 					}}}
 		stage('Add Tag to Repository') {
 			steps { withCredentials([usernamePassword(credentialsId: 'gitPAT',usernameVariable: 'GIT_USERNAME', passwordVariable: 'GIT_PASSWORD')]){
@@ -110,15 +108,12 @@ pipeline {
 		stage('Fetch from Nexus & Deploy using Ansible') {
 			agent { label 'agent1' }
 			when { expression { return params.AnsibleDeploy }}
-			steps{
-				script{
-					dir('ansible'){
-						echo "${params.AnsibleDeploy}"
-						echo "${NEXUS_ARTIFACT}"
-						def artifact = NEXUS_ARTIFACT
-						echo "${artifact}"
-						sh 'ansible-playbook deployment.yml -e NEXUS_ARTIFACT=${NEXUS_ARTIFACT} -v > live_log.txt || exit 1'
-						sh 'tail -2 live_log.txt'}
+			steps {
+				script{ dir('ansible') {
+					def artifact = NEXUS_ARTIFACT
+					echo "${artifact}"
+					sh "ansible-playbook deployment.yml -e NEXUS_ARTIFACT=${artifact} -vv > live_log.txt || exit 1"
+					sh 'tail -2 live_log.txt' }
 				}}
 			post { always { archiveArtifacts artifacts: "ansible/live_log.txt", fingerprint: true } }
 		} 
@@ -126,14 +121,12 @@ pipeline {
 			agent { label 'agent1' }
 			when { expression { return params.EksDeploy }}
 			steps {
-				script{
-					dir('k8s'){
-						sh "chmod +x ./cluster.sh && ./cluster.sh" 
-						sh '''kubectl apply -f ./eksdeploy.yml
-                                                kubectl get deployments && sleep 5 && kubectl get svc
-						'''   }}}
+				script{ dir('k8s') {
+					sh "chmod +x ./cluster.sh && ./cluster.sh" 
+					sh '''kubectl apply -f ./eksdeploy.yml
+                                        kubectl get deployments && sleep 5 && kubectl get svc
+				        '''   }}}
 			post { always { cleanWs() } }
 		} 
-	}
-	post { always { cleanWs() } }
+	} post { always { cleanWs() } }
 }
