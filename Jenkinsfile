@@ -109,7 +109,9 @@ pipeline {
 			when { expression { return params.AnsibleDeploy }}
 			steps {
 				script{ dir('ansible') {
-					sh "ansible-playbook deployment.yml -v -e 'NEXUS_ARTIFACT=${NEXUS_ARTIFACT}' > live_log.txt"
+					sh '''
+                                        ansible-playbook deployment.yml -v -e NEXUS_ARTIFACT=${NEXUS_ARTIFACT} > live_log.txt
+					'''
 					//sh "ansible-playbook deployment.yml -e NEXUS_ARTIFACT=${artifact} > live_log.txt || exit 1"
 					//sh 'tail -2 live_log.txt'
 				}
