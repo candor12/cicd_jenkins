@@ -59,7 +59,8 @@ pipeline {
 					sh "mvn deploy -DskipTests -Dmaven.install.skip=true > nexus.log && cat nexus.log"
 					def artifactUrl = sh(returnStdout: true, script: 'tail -20 nexus.log | grep ".war" nexus.log | grep -v INFO | grep -v Uploaded') 
 					NEXUS_ARTIFACT = artifactUrl.drop(20)    //groovy
-					env.NEXUS_ARTIFACT = sh(returnStdout: true, script: 'echo $NEXUS_ARTIFACT')
+					echo "${NEXUS_ARTIFACT}"
+					env.NEXUS_ARTIFACT = sh(returnStdout: true, script: 'echo "$NEXUS_ARTIFACT"')
 					echo "${env.NEXUS_ARTIFACT}"
 					}}}
 		stage('Add Tag to Repository') {
