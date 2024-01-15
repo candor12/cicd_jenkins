@@ -1,4 +1,4 @@
-def NEXUS_ARTIFACT  =   ''
+def NEXUS_ARTIFACT = ''
 pipeline {
 	options {
 		buildDiscarder(logRotator(numToKeepStr: '10'))
@@ -22,7 +22,6 @@ pipeline {
 	        ecr_repo             =     '674583976178.dkr.ecr.us-east-2.amazonaws.com/teamimagerepo'
                 ecrCreds             =     'awscreds'
 	        dockerImage          =     "${env.ecr_repo}:${env.BUILD_ID}"
-		
 	}
 	stages{
 		stage('SCM Checkout'){
@@ -128,5 +127,6 @@ pipeline {
 				        '''   }}}
 			post { always { cleanWs() } }
 		} 
-	} post { always { cleanWs() } }
+	} 
+	post { always { cleanWs() } }
 }
