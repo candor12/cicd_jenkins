@@ -75,7 +75,7 @@ pipeline {
 		stage('Docker Image Build') {
 			agent { label 'agent1' }
 			steps {
-				script {
+				script { cleanWs()
 					git branch: branch, url: repoUrl
 					image = docker.build(ecr_repo + ":$BUILD_ID", "./") 
 				}}}
