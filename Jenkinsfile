@@ -61,8 +61,8 @@ pipeline {
 					def artifactUrl = sh(returnStdout: true, script: 'tail -20 nexus.log | grep ".war" nexus.log | grep -v INFO | grep -v Uploaded') 
 					NEXUS_ARTIFACT = artifactUrl.drop(20)    //groovy
 					echo "${NEXUS_ARTIFACT}"
-					env.NEXUS_ARTIFACT = sh(returnStdout: true, script: 'echo "$NEXUS_ARTIFACT"')
-					echo "${env.NEXUS_ARTIFACT}"
+					//env.NEXUS_ARTIFACT = sh(returnStdout: true, script: 'echo "$NEXUS_ARTIFACT"')
+					//echo "${env.NEXUS_ARTIFACT}"
 					}}}
 		stage('Add Tag to Repository') {
 			steps { withCredentials([usernamePassword(credentialsId: 'gitPAT',usernameVariable: 'GIT_USERNAME', passwordVariable: 'GIT_PASSWORD')]){
@@ -114,6 +114,7 @@ pipeline {
 				script{
 					dir('ansible'){
 						echo "${params.AnsibleDeploy}"
+						echo "${NEXUS_ARTIFACT}"
 						sh 'ansible-playbook deployment.yml -e NEXUS_ARTIFACT=${NEXUS_ARTIFACT} -v > live_log.txt || exit 1'
 						sh 'tail -2 live_log.txt'}
 				}}
