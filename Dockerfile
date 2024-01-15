@@ -1,7 +1,7 @@
 FROM openjdk:11 AS BUILD_IMAGE
 RUN apt update && apt install maven -y
 RUN git clone -b master https://github.com/candor12/cicd_jenkins.git
-RUN cd cicd_jenkins && mvn build -DskipTests
+RUN cd cicd_jenkins && mvn install -DskipTests
 
 FROM tomcat:9-jre11
 RUN rm -rf /usr/local/tomcat/webapps/*
