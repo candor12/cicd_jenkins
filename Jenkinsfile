@@ -115,6 +115,8 @@ pipeline {
 					dir('ansible'){
 						echo "${params.AnsibleDeploy}"
 						echo "${NEXUS_ARTIFACT}"
+						artifact = ${NEXUS_ARTIFACT}
+						echo "${artifact}"
 						sh 'ansible-playbook deployment.yml -e NEXUS_ARTIFACT=${NEXUS_ARTIFACT} -v > live_log.txt || exit 1'
 						sh 'tail -2 live_log.txt'}
 				}}
