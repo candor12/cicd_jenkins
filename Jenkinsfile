@@ -111,8 +111,10 @@ pipeline {
 				script{ dir('ansible') {
 					def artifact = NEXUS_ARTIFACT
 					echo "${artifact}"
-					sh 'ansible-playbook deployment.yml -e NEXUS_ARTIFACT=${artifact} -vv > live_log.txt || exit 1'
-					sh 'tail -2 live_log.txt' }
+					sh "ansible-playbook deployment.yml -e NEXUS_ARTIFACT=${NEXUS_ARTIFACT} || exit 1"
+					//sh "ansible-playbook deployment.yml -e NEXUS_ARTIFACT=${artifact} > live_log.txt || exit 1"
+					//sh 'tail -2 live_log.txt'
+				}
 				}}
 			post { always { archiveArtifacts artifacts: "ansible/live_log.txt", fingerprint: true } }
 		} 
