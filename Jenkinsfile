@@ -1,3 +1,4 @@
+def NEXUS_ARTIFACT       = ''
 pipeline {
 	options {
 		buildDiscarder(logRotator(numToKeepStr: '10'))
@@ -12,16 +13,16 @@ pipeline {
 		booleanParam(name: "Trivy", defaultValue: false, description: "By Pass Trivy Scan")
 	}	
 	environment {
-		pomVersion           = sh(returnStdout: true, script: 'mvn -DskipTests help:evaluate -Dexpression=project.version -q -DforceStdout')
-		branch               = 'master'
-		repoUrl              = 'https://github.com/candor12/cicd_jenkins.git'
-		gitCreds             = 'gitPAT'
-		gitTag               = "${env.pomVersion}-${env.BUILD_TIMESTAMP}"
-	        scannerHome          = tool 'sonar4.7'
-	        ecr_repo             = '674583976178.dkr.ecr.us-east-2.amazonaws.com/teamimagerepo'
-                ecrCreds             = 'awscreds'
-	        dockerImage          = "${env.ecr_repo}:${env.BUILD_ID}"
-		NEXUS_ARTIFACT       = ''
+		pomVersion           =    sh(returnStdout: true, script: 'mvn -DskipTests help:evaluate -Dexpression=project.version -q -DforceStdout')
+		branch               =    'master'
+		repoUrl              =    'https://github.com/candor12/cicd_jenkins.git'
+		gitCreds             =    'gitPAT'
+		gitTag               =    "${env.pomVersion}-${env.BUILD_TIMESTAMP}"
+	        scannerHome          =     tool 'sonar4.7'
+	        ecr_repo             =     '674583976178.dkr.ecr.us-east-2.amazonaws.com/teamimagerepo'
+                ecrCreds             =     'awscreds'
+	        dockerImage          =     "${env.ecr_repo}:${env.BUILD_ID}"
+		
 	}
 	stages{
 		stage('SCM Checkout'){
