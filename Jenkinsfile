@@ -3,40 +3,38 @@ pipeline {
 	options {
 		buildDiscarder(logRotator(numToKeepStr: '10'))
                 skipDefaultCheckout() 
-                disableConcurrentBuilds()
-	}
+                disableConcurrentBuilds() }
 	agent any
 	parameters {
 		booleanParam(name: "EksDeploy", defaultValue: false, description: "Deploy the Build to EKS")
 		booleanParam(name: "AnsibleDeploy", defaultValue: false, description: "Deploy the Build to Target Server using Ansible")
 		booleanParam(name: "SonarQube", defaultValue: false, description: "By Pass SonarQube Scan")
-		booleanParam(name: "Trivy", defaultValue: false, description: "By Pass Trivy Scan")
-	}	
+		booleanParam(name: "Trivy", defaultValue: false, description: "By Pass Trivy Scan") }	
 	environment {
-		pomVersion           =    sh(returnStdout: true, script: 'mvn -DskipTests help:evaluate -Dexpression=project.version -q -DforceStdout')
-		branch               =    'master'
-		repoUrl              =    'https://github.com/candor12/cicd_jenkins.git'
-		gitCreds             =    'gitPAT'
-		gitTag               =    "${env.pomVersion}-${env.BUILD_TIMESTAMP}"
-	        scannerHome          =     tool 'sonar4.7'
-	        ecr_repo             =     '674583976178.dkr.ecr.us-east-2.amazonaws.com/teamimagerepo'
-                ecrCreds             =     'awscreds'
-	        dockerImage          =     "${env.ecr_repo}:${env.BUILD_ID}"
-	}
+		pomVersion       =       sh(returnStdout: true, script: 'mvn -DskipTests help:evaluate -Dexpression=project.version -q -DforceStdout')
+		branch           =       'master'
+		repoUrl          =       'https://github.com/candor12/cicd_jenkins.git'
+		gitCreds         =       'gitPAT'
+		gitTag           =       "${env.pomVersion}-${env.BUILD_TIMESTAMP}"
+	        scannerHome      =        tool 'sonar4.7'
+	        ecr_repo         =        '674583976178.dkr.ecr.us-east-2.amazonaws.com/teamimagerepo'
+                ecrCreds         =        'awscreds'
+	        dockerImage      =        "${env.ecr_repo}:${env.BUILD_ID}" }
+	
 	stages{
-		stage('SCM Checkout'){
-			steps{
+		stage('SCM Checkout') {
+			steps {
 				git branch: branch, url: repoUrl, credentialsId: 'gitPAT'
 		}}
-		stage('Maven Build'){
+		stage('Maven Build') {
 			steps {
 				sh 'mvn clean install -DskipTests'
 			}}
 		stage('SonarQube Scan') {
-			when { not{ expression { return params.SonarQube  }}}
+			when { not { expression { return params.SonarQube  }}}
 			tools { jdk "jdk-11" }
 			steps {
-				script{
+				script {
 					withSonarQubeEnv('sonar') {
 						echo "Stage: SonarQube Scan"
 						sh '''${scannerHome}/bin/sonar-scanner -Dsonar.projectKey=jenkins \
@@ -61,16 +59,14 @@ pipeline {
 					NEXUS_ARTIFACT = artifactUrl.drop(20)    //groovy
 					echo "Artifact URL: ${NEXUS_ARTIFACT}"
 					}}}
-		stage('Add Tag to Repository') {
-			steps { withCredentials([usernamePassword(credentialsId: 'gitPAT',usernameVariable: 'GIT_USERNAME', passwordVariable: 'GIT_PASSWORD')]){
+		stage('Push Tag to Repository') {
+			steps { withCredentials([usernamePassword(credentialsId: 'gitPAT',usernameVariable: 'GIT_USERNAME', passwordVariable: 'GIT_PASSWORD')]) {
 				sh '''
                                 git tag ${gitTag}
                                 git push --tags 
 				'''
 				echo "Tag pushed to repository: ${gitTag}" 
-				}}
-		} 
-		
+				}}} 
 		stage('Docker Image Build') {
 			agent { label 'agent1' }
 			steps {
@@ -80,8 +76,8 @@ pipeline {
 				}}}
 		stage ('Trivy Scan') {
 			agent { label 'agent1' }
-			when { not{ expression { return params.Trivy  }}}
-			steps{
+			when { not { expression { return params.Trivy  }}}
+			steps {
 				script {
 					 sh 'curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/html.tpl > ./html.tpl'
 				         sh 'trivy image --skip-db-update --skip-java-db-update --cache-dir ~/trivy/ --format template --template \"@./html.tpl\" -o trivy.html --severity MEDIUM,HIGH,CRITICAL ${dockerImage}' 
@@ -89,8 +85,7 @@ pipeline {
 			post { always { archiveArtifacts artifacts: "trivy.html", fingerprint: true
 				                     publishHTML target : [allowMissing: true, alwaysLinkToLastBuild: true, keepAll: true,
 									   reportDir: './', reportFiles: 'trivy.html', reportName: 'Trivy Scan', reportTitles: 'Trivy Scan']
-				      }}
-		}		
+				      }}}		
 		stage('Push Image to ECR') {
 			agent { label 'agent1' }
 			steps {
@@ -101,28 +96,19 @@ pipeline {
 				}}
 			post { success {
 				sh 'docker rmi -f ${dockerImage}'
-				sh 'docker builder prune --all -f'
-			} }
-		}
+			}}}
 		stage('Fetch from Nexus & Deploy using Ansible') {
 			agent { label 'agent1' }
 			when { expression { return params.AnsibleDeploy }}
 			steps {
 				script{ dir('ansible') {
-					sh '''
-                                        ansible-playbook deployment.yml -v -e NEXUS_ARTIFACT=${NEXUS_ARTIFACT} > live_log.txt
-					'''
-					//sh "ansible-playbook deployment.yml -e NEXUS_ARTIFACT=${artifact} > live_log.txt || exit 1"
-					//sh 'tail -2 live_log.txt'
-				}
-				}}
-			//post { always { archiveArtifacts artifacts: "ansible/live_log.txt", fingerprint: true } }
-		} 
+					sh "ansible-playbook deployment.yml -e NEXUS_ARTIFACT=${NEXUS_ARTIFACT}" }
+				}}} 
 		stage('Deploy to EKS') {
 			agent { label 'agent1' }
 			when { expression { return params.EksDeploy }}
 			steps {
-				script{ dir('k8s') {
+				script { dir('k8s') {
 					sh "chmod +x ./cluster.sh && ./cluster.sh" 
 					sh '''kubectl apply -f ./eksdeploy.yml
                                         kubectl get deployments && sleep 5 && kubectl get svc
