@@ -62,7 +62,10 @@ pipeline {
 					}}}
 		stage('Push Tag to Repository') {
 			steps { withCredentials([usernamePassword(credentialsId: 'gitPAT',usernameVariable: 'GIT_USERNAME', passwordVariable: 'GIT_PASSWORD')]) {
-				echo "${pomVersion}"
+				def tag = { it.split("tmart-")[1] [0..] }
+				echo "${tag}"
+				def gitTag = tag.substring(0, str.length()-4)
+				echo "${gitTag}
 				sh '''
                                 git tag -a ${gitTag} -m "Pushed by Jenkins"
                                 git push origin --tags
