@@ -89,11 +89,10 @@ pipeline {
 				      }}}		
 		stage('Push Image to ECR') {
 			agent { label 'agent1' }
-			steps {
+			steps { withCredentials([aws(credentialsId: "ecrCreds")])
 				script {
-					docker.withRegistry("https://" + ecr_repo, "ecr:us-east-2:" + ecrCreds) {
-						image.push("$BUILD_ID")
-						image.push('latest') }
+					 sh 'docker push $ecr_Repo:latest'
+					 sh 'docker push $dockerImage'
 				}}
 			post { success {
 				sh 'docker rmi -f ${dockerImage}'
@@ -103,7 +102,7 @@ pipeline {
 			when { expression { return params.AnsibleDeploy }}
 			steps {
 				script{ dir('ansible') {
-					sh "ansible-playbook deployment.yml -e NEXUS_ARTIFACT=$NEXUS_ARTIFACT" }
+					sh 'ansible-playbook deployment.yml -e NEXUS_ARTIFACT=$NEXUS_ARTIFACT' }
 				}}} 
 		stage('Deploy to EKS') {
 			agent { label 'agent1' }
