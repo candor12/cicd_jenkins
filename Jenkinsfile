@@ -29,7 +29,7 @@ pipeline {
 			steps {
 				git branch: branch, url: repoUrl, credentialsId: 'gitPAT'
 		}}
-		stage('Maven Build') {
+		stage('Build Artifact') {
 			steps {
 				sh 'mvn clean install -DskipTests'
 			}}
@@ -100,12 +100,12 @@ pipeline {
 					    sh 'docker push $dockerImage'
 				    }
 					sh "docker push ${ecr_Repo}:latest"
-					//sh 'docker push $dockerImage'
 				}}
 			post { always {
-				sh 'rm -f ecr.txt'
-				sh "docker rmi -f ${dockerImage}"
-				sh "docker rmi -f ${ecr_Repo}:latest" }
+				sh """ rm -f ecr.txt
+				docker rmi -f ${dockerImage}
+				docker rmi -f ${ecr_Repo}:latest
+				""" }
 			}}
 		stage('Fetch from Nexus & Deploy using Ansible') {
 			agent { label 'agent1' }
