@@ -54,13 +54,13 @@ pipeline {
 			steps {
 				script {
 					sh "mvn deploy -DskipTests -Dmaven.install.skip=true > nexus.log && cat nexus.log"
-					def artifactUrl = sh(returnStdout: true, script: 'tail -20 nexus.log | grep ".war" nexus.log | grep -v INFO | grep -v Uploaded') 
-					def NEXUS_ARTIFACT  = artifactUrl.drop(20)    //groovy
-					pomVersion      = NEXUS_ARTIFACT.dropRight(4)
-                                        gitTag          = NEXUS_ARTIFACT.drop(94)
-					echo "Artifact URL: ${NEXUS_ARTIFACT}"
+					def artifactUrl     = sh(returnStdout: true, script: 'tail -20 nexus.log | grep ".war" nexus.log | grep -v INFO | grep -v Uploaded') 
+					def nexusArtifact   = artifactUrl.drop(20)    //groovy
+					echo "Artifact URL: ${nexusArtifact}"
+					def pomVersion      = nexusArtifact.dropRight(4)
+                                        def gitTag          = nexusArtifact.drop(94)
 					}}}
-		stage('Push Tag to Repository') {
+		/*stage('Push Tag to Repository') {
 			steps { withCredentials([usernamePassword(credentialsId: 'gitPAT',usernameVariable: 'GIT_USERNAME', passwordVariable: 'GIT_PASSWORD')]) {
 				script{
 					//def pomVersion =  sh(returnStdout: true, script:  mvn help:evaluate -Dexpression='project.version' -q -DforceStdout)
@@ -69,7 +69,7 @@ pipeline {
                                         git tag -a $gitTag -m "Pushed by Jenkins
                                         git push origin --tags
 				        '''
-				}}}}
+				}}}} */
 		stage('Docker Image Build') {
 			agent { label 'agent1' }
 			steps {
@@ -115,7 +115,7 @@ pipeline {
 			when { expression { return params.AnsibleDeploy }}
 			steps {
 				script{ dir('ansible') {
-					sh "ansible-playbook deployment.yml -e NEXUS_ARTIFACT=$NEXUS_ARTIFACT" }
+					sh "ansible-playbook deployment.yml -e NEXUS_ARTIFACT=$nexusArtifact" }
 				}}} 
 		stage('EKS Deployment') {
 			agent { label 'agent1' }
