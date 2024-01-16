@@ -1,4 +1,4 @@
-def NEXUS_ARTIFACT = ''
+//def NEXUS_ARTIFACT = ''
 pipeline {
 	options {
 		buildDiscarder(logRotator(numToKeepStr: '8'))
@@ -19,10 +19,10 @@ pipeline {
 		repoUrl          =       'https://github.com/candor12/cicd_jenkins.git'
 		gitCreds         =       'gitPAT'
 		gitTag           =       "${env.pomVersion}-${env.BUILD_TIMESTAMP}"
-	        scannerHome      =        tool 'sonar4.7'
-	        ecr_repo         =        '674583976178.dkr.ecr.us-east-2.amazonaws.com/teamimagerepo'
-                ecrCreds         =        'awscreds'
-	        dockerImage      =        "${env.ecr_repo}:${env.BUILD_ID}" }
+	        scannerHome      =       tool 'sonar4.7'
+	        ecr_repo         =       '674583976178.dkr.ecr.us-east-2.amazonaws.com/teamimagerepo'
+                ecrCreds         =       'awscreds'
+	        dockerImage      =       "${env.ecr_repo}:${env.BUILD_ID}" }
 	
 	stages{
 		stage('SCM Checkout') {
