@@ -13,12 +13,9 @@ pipeline {
 		booleanParam(name: "Trivy", defaultValue: false, description: "By Pass Trivy Scan") }
 	
 	environment {
-	      //def pomVersion   =       sh(returnStdout: true, script: "mvn help:evaluate -Dexpression='project.version' -q -DforceStdout")
-		pomVersion       =       readMavenPom().getVersion()
 		branch           =       "correct"
 		repoUrl          =       "https://github.com/candor12/cicd_jenkins.git"
 		gitCreds         =       "gitPAT"
-		gitTag           =       "${pomVersion}-${env.BUILD_TIMESTAMP}"
 	        scannerHome      =       tool 'sonar4.7'
 	        ecrRepo          =       "674583976178.dkr.ecr.us-east-2.amazonaws.com/teamimagerepo"
                 ecrCreds         =       "awscreds"
@@ -58,16 +55,21 @@ pipeline {
 				script {
 					sh "mvn deploy -DskipTests -Dmaven.install.skip=true > nexus.log && cat nexus.log"
 					def artifactUrl = sh(returnStdout: true, script: 'tail -20 nexus.log | grep ".war" nexus.log | grep -v INFO | grep -v Uploaded') 
-					NEXUS_ARTIFACT = artifactUrl.drop(20)    //groovy
+					NEXUS_ARTIFACT  = artifactUrl.drop(20)    //groovy
+					pomVersion      = NEXUS_ARTIFACT.dropRight(4)
+                                        gitTag          = NEXUS_ARTIFACT.drop(94)
 					echo "Artifact URL: ${NEXUS_ARTIFACT}"
 					}}}
 		stage('Push Tag to Repository') {
 			steps { withCredentials([usernamePassword(credentialsId: 'gitPAT',usernameVariable: 'GIT_USERNAME', passwordVariable: 'GIT_PASSWORD')]) {
-				sh '''
-                                git tag -a $gitTag -m "Pushed by Jenkins"
-                                git push origin --tags
-				'''
-				}}}  
+				script{
+					//def pomVersion =  sh(returnStdout: true, script:  mvn help:evaluate -Dexpression='project.version' -q -DforceStdout)
+					//def gitTag = "${pomVersion}-${env.BUILD_TIMESTAMP}"
+					sh '''
+                                        git tag -a $gitTag -m "Pushed by Jenkins
+                                        git push origin --tags
+				        '''
+				}}}}
 		stage('Docker Image Build') {
 			agent { label 'agent1' }
 			steps {
