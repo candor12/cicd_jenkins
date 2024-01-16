@@ -72,7 +72,8 @@ pipeline {
 			steps {
 				script { cleanWs()
 					git branch: branch, url: repoUrl
-					image = docker.build(ecr_repo + ":$BUILD_ID", "./") 
+					sh 'docker build -t $dockerImage ./docker/'
+					sh 'docker tag $ecr_repo $ecr_repo:latest'
 				}}}
 		stage ('Trivy Scan') {
 			agent { label 'agent1' }
@@ -102,7 +103,7 @@ pipeline {
 			when { expression { return params.AnsibleDeploy }}
 			steps {
 				script{ dir('ansible') {
-					sh "ansible-playbook deployment.yml -e NEXUS_ARTIFACT=${NEXUS_ARTIFACT}" }
+					sh "ansible-playbook deployment.yml -e NEXUS_ARTIFACT=$NEXUS_ARTIFACT" }
 				}}} 
 		stage('Deploy to EKS') {
 			agent { label 'agent1' }
