@@ -1,4 +1,4 @@
-pomVersion       =       sh(returnStdout: true, script: 'mvn -DskipTests help:evaluate -Dexpression=project.version -q -DforceStdout')
+def pomVersion       =       sh(returnStdout: true, script: 'mvn -DskipTests help:evaluate -Dexpression=project.version -q -DforceStdout')
 pipeline {
 	options {
 		buildDiscarder(logRotator(numToKeepStr: '8'))
