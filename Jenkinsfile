@@ -1,4 +1,3 @@
-def pomVersion=sh(returnStdout: true, script: 'mvn -DskipTests help:evaluate -Dexpression=project.version -q -DforceStdout')
 pipeline {
 	options {
 		buildDiscarder(logRotator(numToKeepStr: '8'))
@@ -14,6 +13,7 @@ pipeline {
 		booleanParam(name: "Trivy", defaultValue: false, description: "By Pass Trivy Scan") }
 	
 	environment {
+		def pomVersion   =       sh(returnStdout: true, script: 'mvn -DskipTests help:evaluate -Dexpression=project.version -q -DforceStdout')
 		branch           =       "correct"
 		repoUrl          =       "https://github.com/candor12/cicd_jenkins.git"
 		gitCreds         =       "gitPAT"
