@@ -64,17 +64,19 @@ pipeline {
 		stage('Push Tag to Repository') {
 			steps { withCredentials([usernamePassword(credentialsId: 'gitPAT',usernameVariable: 'GIT_USERNAME', passwordVariable: 'GIT_PASSWORD')]) {
 				sh '''
-                                git tag -a ${gitTag} -m "Pushed by Jenkins"
+                                git tag -a $gitTag -m "Pushed by Jenkins"
                                 git push origin --tags
 				'''
-				}}}  */
+				}}}  
 		stage('Docker Image Build') {
 			agent { label 'agent1' }
 			steps {
 				script { cleanWs()
 					git branch: branch, url: repoUrl
-					sh 'docker build -t $dockerImage ./'
-					sh 'docker tag $dockerImage $ecrRepo:latest'
+					sh '''
+                                        docker build -t $dockerImage ./
+					docker tag $dockerImage $ecrRepo:latest
+                                        '''
 				}}}
 		stage ('Trivy Scan') {
 			agent { label 'agent1' }
