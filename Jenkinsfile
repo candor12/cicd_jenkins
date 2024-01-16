@@ -12,7 +12,7 @@ pipeline {
 		booleanParam(name: "Trivy", defaultValue: false, description: "By Pass Trivy Scan") }	
 	environment {
 		pomVersion       =       sh(returnStdout: true, script: 'mvn -DskipTests help:evaluate -Dexpression=project.version -q -DforceStdout')
-		branch           =       'master'
+		branch           =       'correct'
 		repoUrl          =       'https://github.com/candor12/cicd_jenkins.git'
 		gitCreds         =       'gitPAT'
 		gitTag           =       "${env.pomVersion}-${env.BUILD_TIMESTAMP}"
@@ -89,13 +89,14 @@ pipeline {
 				      }}}		
 		stage('Push Image to ECR') {
 			agent { label 'agent1' }
-			steps { withCredentials([aws(credentialsId: "ecrCreds")])
+			steps { withAWS(credentials: 'ecrCreds', region: 'us-east-2') {
 				script {
 					 sh 'docker push $ecr_Repo:latest'
 					 sh 'docker push $dockerImage'
 				}}
-			post { success {
+			post { always {
 				sh 'docker rmi -f ${dockerImage}'
+				sh 'docker rmi -f $ecr_Repo:latest'
 			}}}
 		stage('Fetch from Nexus & Deploy using Ansible') {
 			agent { label 'agent1' }
