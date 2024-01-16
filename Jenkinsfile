@@ -54,24 +54,21 @@ pipeline {
 			steps {
 				script {
 					sh "mvn deploy -DskipTests -Dmaven.install.skip=true > nexus.log && cat nexus.log"
-					def artifactUrl     = sh(returnStdout: true, script: 'tail -20 nexus.log | grep ".war" nexus.log | grep -v INFO | grep -v Uploaded') 
-					def nexusArtifact   = artifactUrl.drop(20)    //groovy
+					def artifactUrl     =     sh(returnStdout: true, script: 'tail -20 nexus.log | grep ".war" nexus.log | grep -v INFO | grep -v Uploaded') 
+					def nexusArtifact   =     artifactUrl.drop(20)    //groovy
+                                        def tag             =     nexusArtifact.drop(94)
+					def gitTag          =     tag.take(22)
 					echo "Artifact URL: ${nexusArtifact}"
-					//def pomVersion      = nexusArtifact.dropRight(4)
-                                        def tag               = nexusArtifact.drop(94)
-					def gitTag         =  tag.take(22)
-					echo "$gitTag"
 					}}}
-		/*stage('Push Tag to Repository') {
+		stage('Push Tag to Repository') {
 			steps { withCredentials([usernamePassword(credentialsId: 'gitPAT',usernameVariable: 'GIT_USERNAME', passwordVariable: 'GIT_PASSWORD')]) {
 				script{
-					//def pomVersion =  sh(returnStdout: true, script:  mvn help:evaluate -Dexpression='project.version' -q -DforceStdout)
-					//def gitTag = "${pomVersion}-${env.BUILD_TIMESTAMP}"
+					echo "$gitTag"
 					sh '''
                                         git tag -a $gitTag -m "Pushed by Jenkins
                                         git push origin --tags
 				        '''
-				}}}} */
+				}}}} 
 		stage('Docker Image Build') {
 			agent { label 'agent1' }
 			steps {
