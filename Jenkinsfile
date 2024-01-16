@@ -30,7 +30,7 @@ pipeline {
 		}}
 		stage('Build Artifact') {
 			steps {
-				sh 'mvn clean install -DskipTests'
+				sh 'mvn clean install -Drevision=${BUILD_NUMBER} -DskipTests'
 			}}
 		stage('SonarQube Scan') {
 			when { not { expression { return params.SonarQube  }}}
@@ -60,7 +60,7 @@ pipeline {
 					NEXUS_ARTIFACT = artifactUrl.drop(20)    //groovy
 					echo "Artifact URL: ${NEXUS_ARTIFACT}"
 					}}}
-		stage('Push Tag to Repository') {
+		/*stage('Push Tag to Repository') {
 			steps { withCredentials([usernamePassword(credentialsId: 'gitPAT',usernameVariable: 'GIT_USERNAME', passwordVariable: 'GIT_PASSWORD')]) {
 				def tag = { it.split("tmart-")[1]}
 				echo "${tag}"
@@ -71,7 +71,7 @@ pipeline {
                                 git push origin --tags
 				'''
 				echo "Tag pushed to repository: ${gitTag}" 
-				}}} 
+				}}}  */
 		stage('Docker Image Build') {
 			agent { label 'agent1' }
 			steps {
