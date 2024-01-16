@@ -1,4 +1,3 @@
-//def NEXUS_ARTIFACT = ''
 pipeline {
 	options {
 		buildDiscarder(logRotator(numToKeepStr: '8'))
