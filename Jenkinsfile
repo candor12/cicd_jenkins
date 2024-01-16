@@ -1,7 +1,7 @@
 def NEXUS_ARTIFACT = ''
 pipeline {
 	options {
-		buildDiscarder(logRotator(numToKeepStr: '10'))
+		buildDiscarder(logRotator(numToKeepStr: '8'))
                 skipDefaultCheckout() 
                 disableConcurrentBuilds() }
 	agent any
@@ -72,7 +72,7 @@ pipeline {
 			steps {
 				script { cleanWs()
 					git branch: branch, url: repoUrl
-					sh 'docker build -t $dockerImage ./docker/'
+					sh 'docker build -t $dockerImage ./'
 					sh 'docker tag $ecr_repo $ecr_repo:latest'
 				}}}
 		stage ('Trivy Scan') {
