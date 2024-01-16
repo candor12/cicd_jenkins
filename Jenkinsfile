@@ -17,6 +17,7 @@ pipeline {
 		stage('Checkout SCM') {
 			steps {
 				git branch: branch, credentialsId: 'gitPAT', url: repoUrl
+				sh "mvn -DskipTests help:evaluate -Dexpression=project.version -q -DforceStdout"
 			}}
 		stage('Add Tag') {
 			steps {
