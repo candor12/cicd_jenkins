@@ -62,7 +62,7 @@ pipeline {
 					}}}
 		stage('Push Tag to Repository') {
 			steps { withCredentials([usernamePassword(credentialsId: 'gitPAT',usernameVariable: 'GIT_USERNAME', passwordVariable: 'GIT_PASSWORD')]) {
-				def tag = { it.split("tmart-")[1] [0..] }
+				def tag = { it.split("tmart-")[1]}
 				echo "${tag}"
 				def gitTag = tag.substring(0, str.length()-4)
 				echo "${gitTag}
