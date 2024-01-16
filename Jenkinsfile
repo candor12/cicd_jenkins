@@ -63,8 +63,8 @@ pipeline {
 		stage('Push Tag to Repository') {
 			steps { withCredentials([usernamePassword(credentialsId: 'gitPAT',usernameVariable: 'GIT_USERNAME', passwordVariable: 'GIT_PASSWORD')]) {
 				sh '''
-                                git tag ${gitTag}
-                                git push --tags 
+                                git tag -a ${gitTag} -m "Pushed by Jenkins"
+                                git push origin --tags
 				'''
 				echo "Tag pushed to repository: ${gitTag}" 
 				}}} 
