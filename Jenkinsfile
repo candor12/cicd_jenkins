@@ -91,15 +91,22 @@ pipeline {
 				      }}}		
 		stage('Push Image to ECR') {
 			agent { label 'agent1' }
-			steps { withAWS(credentials: 'awscreds', region: 'us-east-2') {
+			steps {
 				script {
-					 sh "docker push ${ecr_Repo}:latest"
-					 sh 'docker push $dockerImage'
+					def status = sh(returnStatus: true, script: 'docker push $dockerImage')
+					if (status != 0){
+					    sh "aws ecr get-authorization-token --region us-east-2 --output text --query 'authorizationData[].authorizationToken' | base64 -d | cut -d: -f2 > ecr.txt"
+                                            sh 'cat ecr.txt | docker login -u AWS 674583976178.dkr.ecr.us-east-2.amazonaws.com --password-stdin'
+					    sh 'docker push $dockerImage'
+				    }
+					sh "docker push ${ecr_Repo}:latest"
+					//sh 'docker push $dockerImage'
 				}}
 			post { always {
+				sh 'rm -f ecr.txt'
 				sh 'docker rmi -f ${dockerImage}'
 				sh 'docker rmi -f $ecr_Repo:latest' }
-			}}}
+			}}
 		stage('Fetch from Nexus & Deploy using Ansible') {
 			agent { label 'agent1' }
 			when { expression { return params.AnsibleDeploy }}
