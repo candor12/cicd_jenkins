@@ -59,6 +59,7 @@ pipeline {
 					echo "Artifact URL: ${nexusArtifact}"
 					//def pomVersion      = nexusArtifact.dropRight(4)
                                         def gitTag          = nexusArtifact.drop(94)
+					echo "$gitTag"
 					}}}
 		/*stage('Push Tag to Repository') {
 			steps { withCredentials([usernamePassword(credentialsId: 'gitPAT',usernameVariable: 'GIT_USERNAME', passwordVariable: 'GIT_PASSWORD')]) {
