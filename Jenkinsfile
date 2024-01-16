@@ -64,10 +64,10 @@ pipeline {
 			steps { withCredentials([usernamePassword(credentialsId: 'gitPAT',usernameVariable: 'GIT_USERNAME', passwordVariable: 'GIT_PASSWORD')]) {
 				script{
 					echo "$gitTag"
-					sh '''
+					sh """
                                         git tag -a $gitTag -m "Pushed by Jenkins
                                         git push origin --tags
-				        '''
+				        """
 				}}}} 
 		stage('Docker Image Build') {
 			agent { label 'agent1' }
