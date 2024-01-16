@@ -8,7 +8,6 @@
 	<name>Team Project</name>
 	<url>http://maven.apache.org</url>
 	<properties>
-		<revision>v2.5</revision>
                 <changelist>-SNAPSHOT</changelist>
 		<spring.version>4.2.0.RELEASE</spring.version>
 		<spring-security.version>4.0.2.RELEASE</spring-security.version>
