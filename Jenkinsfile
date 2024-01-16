@@ -30,7 +30,7 @@ pipeline {
 		}}
 		stage('Build Artifact') {
 			steps {
-				sh 'mvn clean install -Drevision=${BUILD_NUMBER} -DskipTests'
+				sh "mvn clean install -Drevision=v${BUILD_ID} -DskipTests"
 			}}
 		stage('SonarQube Scan') {
 			when { not { expression { return params.SonarQube  }}}
