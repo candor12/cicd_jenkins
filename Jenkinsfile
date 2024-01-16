@@ -65,7 +65,7 @@ pipeline {
 				def tag = { it.split("tmart-")[1]}
 				echo "${tag}"
 				def gitTag = tag.substring(0, str.length()-4)
-				echo "${gitTag}
+				echo "${gitTag}"
 				sh '''
                                 git tag -a ${gitTag} -m "Pushed by Jenkins"
                                 git push origin --tags
