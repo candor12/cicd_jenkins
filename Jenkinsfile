@@ -13,14 +13,14 @@ pipeline {
 		booleanParam(name: "Trivy", defaultValue: false, description: "By Pass Trivy Scan") }
 	
 	environment {
-		pomVersion       =       sh(returnStdout: true, script: 'mvn -DskipTests help:evaluate -Dexpression=project.version -q -DforceStdout')
-		branch           =       'correct'
-		repoUrl          =       'https://github.com/candor12/cicd_jenkins.git'
-		gitCreds         =       'gitPAT'
+		pomVersion       =       sh(returnStdout: true, script: "mvn -DskipTests help:evaluate -Dexpression=project.version -q -DforceStdout")
+		branch           =       "correct"
+		repoUrl          =       "https://github.com/candor12/cicd_jenkins.git"
+		gitCreds         =       "gitPAT"
 		gitTag           =       "${env.pomVersion}-${env.BUILD_TIMESTAMP}"
 	        scannerHome      =       tool 'sonar4.7'
-	        ecr_repo         =       '674583976178.dkr.ecr.us-east-2.amazonaws.com/teamimagerepo'
-                ecrCreds         =       'awscreds'
+	        ecrRepo         =        "674583976178.dkr.ecr.us-east-2.amazonaws.com/teamimagerepo"
+                ecrCreds         =       "awscreds"
 	        dockerImage      =       "${env.ecr_repo}:${env.BUILD_ID}" }
 	
 	stages{
@@ -74,7 +74,7 @@ pipeline {
 				script { cleanWs()
 					git branch: branch, url: repoUrl
 					sh 'docker build -t $dockerImage ./'
-					sh 'docker tag $dockerImage $ecr_repo:latest'
+					sh 'docker tag $dockerImage $ecrRepo:latest'
 				}}}
 		stage ('Trivy Scan') {
 			agent { label 'agent1' }
@@ -98,12 +98,12 @@ pipeline {
                                             sh 'cat ecr.txt | docker login -u AWS 674583976178.dkr.ecr.us-east-2.amazonaws.com --password-stdin'
 					    sh 'docker push $dockerImage'
 				    }
-					sh "docker push ${ecr_Repo}:latest"
+					sh "docker push ${ecrRepo}:latest"
 				}}
 			post { always {
 				sh """ rm -f ecr.txt
 				docker rmi -f ${dockerImage}
-				docker rmi -f ${ecr_Repo}:latest
+				docker rmi -f ${ecrRepo}:latest
 				""" }
 			}}
 		stage('Fetch from Nexus & Deploy using Ansible') {
@@ -113,7 +113,7 @@ pipeline {
 				script{ dir('ansible') {
 					sh "ansible-playbook deployment.yml -e NEXUS_ARTIFACT=$NEXUS_ARTIFACT" }
 				}}} 
-		stage('Deploy to EKS') {
+		stage('EKS Deployment') {
 			agent { label 'agent1' }
 			when { expression { return params.EksDeploy }}
 			steps {
