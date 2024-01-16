@@ -4,12 +4,15 @@ pipeline {
 		buildDiscarder(logRotator(numToKeepStr: '8'))
                 skipDefaultCheckout() 
                 disableConcurrentBuilds() }
+	
 	agent any
+	
 	parameters {
 		booleanParam(name: "EksDeploy", defaultValue: false, description: "Deploy the Build to EKS")
 		booleanParam(name: "AnsibleDeploy", defaultValue: false, description: "Deploy the Build to Target Server using Ansible")
 		booleanParam(name: "SonarQube", defaultValue: false, description: "By Pass SonarQube Scan")
-		booleanParam(name: "Trivy", defaultValue: false, description: "By Pass Trivy Scan") }	
+		booleanParam(name: "Trivy", defaultValue: false, description: "By Pass Trivy Scan") }
+	
 	environment {
 		pomVersion       =       sh(returnStdout: true, script: 'mvn -DskipTests help:evaluate -Dexpression=project.version -q -DforceStdout')
 		branch           =       'correct'
@@ -96,7 +99,7 @@ pipeline {
 				}}
 			post { always {
 				sh 'docker rmi -f ${dockerImage}'
-				sh 'docker rmi -f $ecr_Repo:latest'
+				sh 'docker rmi -f $ecr_Repo:latest' }
 			}}}
 		stage('Fetch from Nexus & Deploy using Ansible') {
 			agent { label 'agent1' }
