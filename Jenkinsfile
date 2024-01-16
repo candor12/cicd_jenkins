@@ -104,7 +104,7 @@ pipeline {
 				}}
 			post { always {
 				sh 'rm -f ecr.txt'
-				sh 'docker rmi -f ${dockerImage}'
+				sh "docker rmi -f ${dockerImage}"
 				sh "docker rmi -f ${ecr_Repo}:latest" }
 			}}
 		stage('Fetch from Nexus & Deploy using Ansible') {
