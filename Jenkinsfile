@@ -73,7 +73,7 @@ pipeline {
 				script { cleanWs()
 					git branch: branch, url: repoUrl
 					sh 'docker build -t $dockerImage ./'
-					sh 'docker tag $ecr_repo $ecr_repo:latest'
+					sh 'docker tag $dockerImage $ecr_repo:latest'
 				}}}
 		stage ('Trivy Scan') {
 			agent { label 'agent1' }
