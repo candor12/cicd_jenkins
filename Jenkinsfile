@@ -1,3 +1,4 @@
+pomVersion       =       sh(returnStdout: true, script: 'mvn -DskipTests help:evaluate -Dexpression=project.version -q -DforceStdout')
 pipeline {
 	options {
 		buildDiscarder(logRotator(numToKeepStr: '8'))
@@ -13,11 +14,10 @@ pipeline {
 		booleanParam(name: "Trivy", defaultValue: false, description: "By Pass Trivy Scan") }
 	
 	environment {
-		pomVersion       =       sh(returnStdout: true, script: "mvn -DskipTests help:evaluate -Dexpression=project.version -q -DforceStdout")
 		branch           =       "correct"
 		repoUrl          =       "https://github.com/candor12/cicd_jenkins.git"
 		gitCreds         =       "gitPAT"
-		gitTag           =       "${env.pomVersion}-${env.BUILD_TIMESTAMP}"
+		gitTag           =       "${pomVersion}-${env.BUILD_TIMESTAMP}"
 	        scannerHome      =       tool 'sonar4.7'
 	        ecrRepo         =        "674583976178.dkr.ecr.us-east-2.amazonaws.com/teamimagerepo"
                 ecrCreds         =       "awscreds"
