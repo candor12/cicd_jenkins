@@ -55,9 +55,9 @@ pipeline {
 				script {
 					sh "mvn deploy -DskipTests -Dmaven.install.skip=true > nexus.log && cat nexus.log"
 					def artifactUrl     =     sh(returnStdout: true, script: 'tail -20 nexus.log | grep ".war" nexus.log | grep -v INFO | grep -v Uploaded') 
-					def nexusArtifact   =     artifactUrl.drop(20)    //groovy
+				        nexusArtifact       =     artifactUrl.drop(20)    //groovy
                                         def tag             =     nexusArtifact.drop(94)
-					def gitTag          =     tag.take(22)
+				        gitTag              =     tag.take(22)
 					echo "Artifact URL: ${nexusArtifact}"
 					}}}
 		stage('Push Tag to Repository') {
