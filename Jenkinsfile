@@ -37,8 +37,7 @@ pipeline {
 			when { not { expression { return params.SonarQube  }}}
 			tools { jdk "jdk-11" }
 			steps {
-				script {
-					withSonarQubeEnv('sonar') {
+				script { withSonarQubeEnv('sonar') {
 						echo "Stage: SonarQube Scan"
 						sh '''${scannerHome}/bin/sonar-scanner -Dsonar.projectKey=jenkins \
                                                 -Dsonar.projectName=tjenkins \
@@ -92,7 +91,7 @@ pipeline {
 				      }}}		
 		stage('Push Image to ECR') {
 			agent { label 'agent1' }
-			steps { withAWS(credentials: 'ecrCreds', region: 'us-east-2') {
+			steps { withAWS(credentials: 'awscreds', region: 'us-east-2') {
 				script {
 					 sh 'docker push $ecr_Repo:latest'
 					 sh 'docker push $dockerImage'
