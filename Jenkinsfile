@@ -55,7 +55,7 @@ pipeline {
 				script {
 					sh "mvn deploy -DskipTests -Dmaven.install.skip=true > nexus.log && cat nexus.log"
 					def artifactUrl = sh(returnStdout: true, script: 'tail -20 nexus.log | grep ".war" nexus.log | grep -v INFO | grep -v Uploaded') 
-					NEXUS_ARTIFACT  = artifactUrl.drop(20)    //groovy
+					def NEXUS_ARTIFACT  = artifactUrl.drop(20)    //groovy
 					pomVersion      = NEXUS_ARTIFACT.dropRight(4)
                                         gitTag          = NEXUS_ARTIFACT.drop(94)
 					echo "Artifact URL: ${NEXUS_ARTIFACT}"
