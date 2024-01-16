@@ -65,7 +65,7 @@ pipeline {
 				script{
 					echo "$gitTag"
 					sh """
-                                        git tag -a ${gitTag} -m "Pushed by Jenkins
+                                        git tag -a $gitTag -m "Pushed by Jenkins"
                                         git push origin --tags
 				        """
 				}}}} 
