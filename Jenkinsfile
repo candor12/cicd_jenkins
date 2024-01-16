@@ -21,7 +21,7 @@ pipeline {
 	        scannerHome      =       tool 'sonar4.7'
 	        ecrRepo         =        "674583976178.dkr.ecr.us-east-2.amazonaws.com/teamimagerepo"
                 ecrCreds         =       "awscreds"
-	        dockerImage      =       "${env.ecr_repo}:${env.BUILD_ID}" }
+	        dockerImage      =       "${env.ecrRepo}:${env.BUILD_ID}" }
 	
 	stages{
 		stage('SCM Checkout') {
