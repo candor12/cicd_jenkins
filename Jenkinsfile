@@ -93,7 +93,7 @@ pipeline {
 			agent { label 'agent1' }
 			steps { withAWS(credentials: 'awscreds', region: 'us-east-2') {
 				script {
-					 sh 'docker push $ecr_Repo:latest'
+					 sh "docker push ${ecr_Repo}:latest"
 					 sh 'docker push $dockerImage'
 				}}
 			post { always {
