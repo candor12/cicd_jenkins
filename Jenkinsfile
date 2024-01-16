@@ -60,7 +60,7 @@ pipeline {
 		stage('Publish Artifact to Nexus') {
 			steps {
 				script {
-					sh "mvn deploy -DskipTests -Dmaven.install.skip=true > nexus.log && cat nexus.log"
+					sh "mvn -Dchangelist=  deploy -DskipTests -Dmaven.install.skip=true > nexus.log && cat nexus.log"
 					def artifactUrl     =     sh(returnStdout: true, script: 'tail -20 nexus.log | grep ".war" nexus.log | grep -v INFO | grep -v Uploaded')
 					//  drop first 20 characters using groovy
 				        nexusArtifact       =     artifactUrl.drop(20)    
