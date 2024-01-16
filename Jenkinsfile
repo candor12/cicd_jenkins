@@ -112,7 +112,7 @@ pipeline {
 			when { expression { return params.AnsibleDeploy }}
 			steps {
 				script{ dir('ansible') {
-					sh 'ansible-playbook deployment.yml -e NEXUS_ARTIFACT=$NEXUS_ARTIFACT' }
+					sh "ansible-playbook deployment.yml -e NEXUS_ARTIFACT=$NEXUS_ARTIFACT" }
 				}}} 
 		stage('Deploy to EKS') {
 			agent { label 'agent1' }
