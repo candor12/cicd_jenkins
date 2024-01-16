@@ -57,7 +57,7 @@ pipeline {
 					def artifactUrl     = sh(returnStdout: true, script: 'tail -20 nexus.log | grep ".war" nexus.log | grep -v INFO | grep -v Uploaded') 
 					def nexusArtifact   = artifactUrl.drop(20)    //groovy
 					echo "Artifact URL: ${nexusArtifact}"
-					def pomVersion      = nexusArtifact.dropRight(4)
+					//def pomVersion      = nexusArtifact.dropRight(4)
                                         def gitTag          = nexusArtifact.drop(94)
 					}}}
 		/*stage('Push Tag to Repository') {
