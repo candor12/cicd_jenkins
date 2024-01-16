@@ -55,19 +55,19 @@ pipeline {
 				script {
 					sh "mvn deploy -DskipTests -Dmaven.install.skip=true > nexus.log && cat nexus.log"
 					def artifactUrl     =     sh(returnStdout: true, script: 'tail -20 nexus.log | grep ".war" nexus.log | grep -v INFO | grep -v Uploaded') 
-				        def nexusArtifact       =     artifactUrl.drop(20)    //groovy
-                                        def tag             =     nexusArtifact.drop(94)
-				        def gitTag              =     tag.take(22)
+				        nexusArtifact       =     artifactUrl.drop(20)     // groovy
+                                        def tag             =     nexusArtifact.drop(94)  //  drop first 94 characters
+				        gitTag              =     tag.take(22)           //   take first 22 characters
 					echo "Artifact URL: ${nexusArtifact}"
 					}}}
 		stage('Push Tag to Repository') {
 			steps { withCredentials([usernamePassword(credentialsId: 'gitPAT',usernameVariable: 'GIT_USERNAME', passwordVariable: 'GIT_PASSWORD')]) {
 				script{
 					echo "$gitTag"
-					sh """
+					sh '''
                                         git tag -a $gitTag -m "Pushed by Jenkins"
                                         git push origin --tags
-				        """
+				        '''
 				}}}} 
 		stage('Docker Image Build') {
 			agent { label 'agent1' }
