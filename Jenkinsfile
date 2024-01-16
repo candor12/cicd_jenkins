@@ -13,13 +13,14 @@ pipeline {
 		booleanParam(name: "Trivy", defaultValue: false, description: "By Pass Trivy Scan") }
 	
 	environment {
-		def pomVersion   =       sh(returnStdout: true, script: "mvn help:evaluate -Dexpression='project.version' -q -DforceStdout")
+	      //def pomVersion   =       sh(returnStdout: true, script: "mvn help:evaluate -Dexpression='project.version' -q -DforceStdout")
+		pomVersion       =       readMavenPom().getVersion()
 		branch           =       "correct"
 		repoUrl          =       "https://github.com/candor12/cicd_jenkins.git"
 		gitCreds         =       "gitPAT"
 		gitTag           =       "${pomVersion}-${env.BUILD_TIMESTAMP}"
 	        scannerHome      =       tool 'sonar4.7'
-	        ecrRepo         =        "674583976178.dkr.ecr.us-east-2.amazonaws.com/teamimagerepo"
+	        ecrRepo          =       "674583976178.dkr.ecr.us-east-2.amazonaws.com/teamimagerepo"
                 ecrCreds         =       "awscreds"
 	        dockerImage      =       "${env.ecrRepo}:${env.BUILD_ID}" }
 	
@@ -30,7 +31,7 @@ pipeline {
 		}}
 		stage('Build Artifact') {
 			steps {
-				sh "mvn clean install -Drevision=v${BUILD_ID} -DskipTests"
+				sh "mvn clean install -DskipTests"
 			}}
 		stage('SonarQube Scan') {
 			when { not { expression { return params.SonarQube  }}}
@@ -60,17 +61,12 @@ pipeline {
 					NEXUS_ARTIFACT = artifactUrl.drop(20)    //groovy
 					echo "Artifact URL: ${NEXUS_ARTIFACT}"
 					}}}
-		/*stage('Push Tag to Repository') {
+		stage('Push Tag to Repository') {
 			steps { withCredentials([usernamePassword(credentialsId: 'gitPAT',usernameVariable: 'GIT_USERNAME', passwordVariable: 'GIT_PASSWORD')]) {
-				def tag = { it.split("tmart-")[1]}
-				echo "${tag}"
-				def gitTag = tag.substring(0, str.length()-4)
-				echo "${gitTag}"
 				sh '''
                                 git tag -a ${gitTag} -m "Pushed by Jenkins"
                                 git push origin --tags
 				'''
-				echo "Tag pushed to repository: ${gitTag}" 
 				}}}  */
 		stage('Docker Image Build') {
 			agent { label 'agent1' }
