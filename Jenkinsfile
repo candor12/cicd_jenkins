@@ -14,6 +14,7 @@ pipeline {
 		branch           =       "tag"
 		repoUrl          =       "https://github.com/candor12/cicd_jenkins.git"
 		gitCreds         =       "gitPAT"
+		gitTag           =       "${pomVersion}-${env.BUILD_TIMESTAMP}"
 	        scannerHome      =       tool 'sonar4.7'
 	        ecrRepo          =       "674583976178.dkr.ecr.us-east-2.amazonaws.com/teamimagerepo"
 	        dockerImage      =       "${env.ecrRepo}:${env.BUILD_ID}" 
@@ -75,7 +76,7 @@ pipeline {
 			steps { 
 				withCredentials([usernamePassword(credentialsId: 'gitPAT',usernameVariable: 'GIT_USERNAME', passwordVariable: 'GIT_PASSWORD')]) {
 					script{
-						def gitTag = sh(returnStdout: true, script: "mvn -DskipTests help:evaluate -Dexpression=project.version -q -DforceStdout")
+						def pomVersion = sh(returnStdout: true, script: "mvn -DskipTests help:evaluate -Dexpression=project.version -q -DforceStdout")
 						echo "${gitTag}"
 						sh """git tag -a ${gitTag} -m "Pushed by Jenkins"
                                                 git push origin --tags
