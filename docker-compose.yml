@@ -1,23 +1,23 @@
 version: '3'
 services:
-  vprodb:
+  teamdb:
     build:
-      context: ./Docker-files/db
-    image: vprodb
-    container_name: vprodb
+      context: ./Dockerfiles/db
+    image: teamdb
+    container_name: teamdb
     ports:
       - "3306:3306"
     volumes:
-      - vprodbdata:/var/lib/mysql
+      - teamdbdata:/var/lib/mysql
     environment:
-      - MYSQL_ROOT_PASSWORD=vprodbpass
+      - MYSQL_ROOT_PASSWORD=teamdbpass
 
-  vprocache01:
+  teamcache1:
     image: memcached
     ports:
       - "11211:11211"
 
-  vpromq01:
+  teamrmq1:
     image: rabbitmq
     ports:
       - "15672:15672"
@@ -25,23 +25,23 @@ services:
       - RABBITMQ_DEFAULT_USER=guest
       - RABBITMQ_DEFAULT_PASS=guest
 
-  vproapp:
+  teamapp:
     build:
-      context: ./Docker-files/app
-    image: vproapp
-    container_name: vproapp
+      context: ./Dockerfiles/app
+    image: teamapp
+    container_name: teamapp
     ports:
       - "8080:8080"
     volumes: 
-      - vproappdata:/usr/local/tomcat/webapps
+      - teamappdata:/usr/local/tomcat/webapps
 
-  vproweb:
+  teamweb:
     build:
-      context: ./Docker-files/web
-    image: vproweb
-    container_name: vproweb
+      context: ./Dockerfiles/web
+    image: teamweb
+    container_name: teamweb
     ports:
       - "80:80"
 volumes:
-  vprodbdata: {}
-  vproappdata: {}
+  teamdbdata: {}
+  teamappdata: {}
