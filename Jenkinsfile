@@ -6,11 +6,6 @@ pipeline {
 		ansiColor('xterm')
 	}
 	agent any
-	parameters {
-		booleanParam(name: "EksDeploy", defaultValue: false, description: "Deploy the Build to EKS")
-		booleanParam(name: "AnsibleDeploy", defaultValue: false, description: "Deploy the Build to Target Server using Ansible")
-		booleanParam(name: "Scan", defaultValue: false, description: "By Pass SonarQube and Trivy Scan")
-	}
 	environment {
 		branch           =       "master"
 		repoUrl          =       "https://github.com/candor12/cicd_jenkins.git"
@@ -25,93 +20,19 @@ pipeline {
 				git branch: branch, url: repoUrl, credentialsId: 'gitPAT'
 			}
 		}
-		stage('Build Artifact') {
-			steps {
-				sh "mvn clean package -DskipTests"
-			}
-		}
-		stage('SonarQube Scan') {
-			when { not { expression { return params.Scan  } } }
-			tools { jdk "jdk-11" }
-			steps {
-				script { 
-					withSonarQubeEnv('sonar') {
-						echo "Stage: SonarQube Scan"
-						sh '''${scannerHome}/bin/sonar-scanner -Dsonar.projectKey=jenkins \
-                                                -Dsonar.projectName=tjenkins \
-                                                -Dsonar.projectVersion=1.0 \
-                                                -Dsonar.sources=src/ \
-                                                -Dsonar.java.binaries=target/test-classes/com/visualpathit/account/controllerTest/ \
-                                                -Dsonar.junit.reportsPath=target/surefire-reports/ \
-                                                -Dsonar.jacoco.reportsPath=target/jacoco.exec \
-                                                -Dsonar.java.checkstyle.reportPaths=target/checkstyle-result.xml'''
-					}
-					echo "Waiting for Quality Gate"
-					timeout(time: 5, unit: 'MINUTES') {
-						def qualitygate = waitForQualityGate(webhookSecretId: 'sqwebhook')
-						if (qualitygate.status != "OK") { 
-							catchError(buildResult: 'UNSTABLE', stageResult: 'FAILURE') { 
-								sh "exit 1"  
-							}
-						}
-					}
-				}
-			}
-		} 
-		stage('Publish Artifact to Nexus') {
-			steps {
-				script {
-					sh "mvn deploy -DskipTests -Dmaven.install.skip=true > nexus.log && cat nexus.log"
-					def artifactUrl     =     sh(returnStdout: true, script: 'tail -20 nexus.log | grep ".war" nexus.log | grep -v INFO | grep -v Uploaded')
-				        nexusArtifact       =     artifactUrl.drop(20)    
-                                        def tag1            =     nexusArtifact.drop(99)
-				        tag2                =     tag1.take(17)         
-					echo "Artifact URL: ${nexusArtifact}"
-				}
-			}
-		}
-		stage('Push Tag to Repository') {
-			steps { 
-				withCredentials([usernamePassword(credentialsId: 'gitPAT',usernameVariable: 'GIT_USERNAME', passwordVariable: 'GIT_PASSWORD')]) {
-					script{
-					        def pomVersion =  sh(returnStdout: true, script: "mvn -DskipTests help:evaluate -Dexpression=project.version -q -DforceStdout")
-						gitTag         =  "${pomVersion}-${tag2}"
-						echo "${gitTag}"
-						sh """git tag -a ${gitTag} -m "Pushed by Jenkins"
-                                                git push origin --tags
-				                """
-					}
-				}
-			}
-		} 
 		stage('Docker Image Build') {
 			agent { label 'agent1' }
 			steps {
 				script { 
 					cleanWs()
 					git branch: branch, url: repoUrl
-					sh '''docker build -t $dockerImage ./
-					docker tag $dockerImage $ecrRepo:latest
-                                        '''
+					sh "docker compose build"
+					sh "docker compose images"
 				}
 			}
 		}
-		stage ('Trivy Scan') {
-			agent { label 'agent1' }
-			when { not { expression { return params.Scan  } } }
-			steps {
-				script {
-					 sh 'curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/html.tpl > ./html.tpl'
-				         sh 'trivy image --skip-db-update --skip-java-db-update --cache-dir ~/trivy/ --format template --template \"@./html.tpl\" -o trivy.html --severity MEDIUM,HIGH,CRITICAL ${dockerImage}' 
-				}
-			}
-			post { always { archiveArtifacts artifacts: "trivy.html", fingerprint: true
-				                     publishHTML target : [allowMissing: true, alwaysLinkToLastBuild: true, keepAll: true,
-									   reportDir: './', reportFiles: 'trivy.html', reportName: 'Trivy Scan', reportTitles: 'Trivy Scan']
-				      }
-			     }
-		}		
-		stage('Push Image to ECR') {
+		
+	/*	stage('Push Image to ECR') {
 			agent { label 'agent1' }
 			steps {
 				script {
@@ -133,17 +54,6 @@ pipeline {
 				}
 			}
 		}
-		stage('Fetch from Nexus & Deploy using Ansible') {
-			agent { label 'agent1' }
-			when { expression { return params.AnsibleDeploy } }
-			steps {
-				script{ 
-					dir('ansible') {
-					sh "ansible-playbook deployment.yml -e NEXUS_ARTIFACT=${nexusArtifact}"
-					}
-				}
-			}
-		} 
 		stage('EKS Deployment') {
 			agent { label 'agent1' }
 			when { expression { return params.EksDeploy } }
@@ -157,7 +67,7 @@ pipeline {
 					}
 				}
 			}
-		} 
+		} */
 	} 
 	post { always { cleanWs() } }
 }
