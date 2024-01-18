@@ -13,6 +13,7 @@ pipeline {
 	        scannerHome      =       tool 'sonar4.7'
 	        ecrRepo          =       "674583976178.dkr.ecr.us-east-2.amazonaws.com/teamimagerepo"
 	        dockerImage      =       "${env.ecrRepo}:${env.BUILD_ID}" 
+		dockerTag        =       "${env.BUILD_ID}-${env.BUILD_TIMESTAMP}"
 	}
 	stages{
 		stage('SCM Checkout') {
@@ -32,8 +33,18 @@ pipeline {
 					cleanWs()
 					git branch: branch, url: repoUrl
 					sh "docker compose build"
-					sh "docker compose images"
+					sh "docker images"
 				}
+			}
+		}
+		stage('Push Image to DockerHub') {
+			agent { label 'agent1' }
+			steps {
+				sh """
+                                docker tag teamapp azkabegh/teamapp:dockerTag
+				docker tag teamweb azkabegh/teamweb:dockerTag
+                                docker tag teamdb azkabegh/teamdb:dockerTag
+				"""
 			}
 		}
 		
