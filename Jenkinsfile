@@ -32,8 +32,12 @@ pipeline {
 				script { 
 					cleanWs()
 					git branch: branch, url: repoUrl
-					sh "docker compose build"
-					sh "docker images"
+					sh """
+                                        docker compose build
+                                        docker tag teamapp azkabegh/teamapp:${dockerTag} && docker tag teamapp azkabegh/teamapp:latest
+				        docker tag teamweb azkabegh/teamweb:${dockerTag} && docker tag teamapp azkabegh/teamweb:latest
+                                        docker tag teamdb azkabegh/teamdb:${dockerTag} && docker tag teamapp azkabegh/teamdb:latest
+				        """
 				}
 			}
 		}
@@ -41,10 +45,10 @@ pipeline {
 			agent { label 'agent1' }
 			steps {
 				sh """
-                                docker tag teamapp azkabegh/teamapp:${dockerTag}
-				docker tag teamweb azkabegh/teamweb:${dockerTag}
-                                docker tag teamdb azkabegh/teamdb:${dockerTag}
-				"""
+				docker push azkabegh/teamapp:${dockerTag} && docker push azkabegh/teamapp:latest
+				docker push azkabegh/teamweb:${dockerTag} && docker push azkabegh/teamweb:latest
+				docker push azkabegh/teamdb:${dockerTag} && docker push azkabegh/teamdb:latest
+                                """
 			}
 		}
 		
