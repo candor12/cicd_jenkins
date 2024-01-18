@@ -44,13 +44,21 @@ pipeline {
 		stage('Push Image to DockerHub') {
 			agent { label 'agent1' }
 			steps {
-				sh """
-				docker push azkabegh/teamapp:${dockerTag} && docker push azkabegh/teamapp:latest
-				docker push azkabegh/teamweb:${dockerTag} && docker push azkabegh/teamweb:latest
-				docker push azkabegh/teamdb:${dockerTag} && docker push azkabegh/teamdb:latest
-                                """
+				script {
+					def status = sh(returnStatus: true, script: docker push azkabegh/teamapp:${dockerTag})
+					if (status != 0) {
+						sh "docker login -u azkabegh -p $dockerhubPAT"
+						sh "docker push azkabegh/teamapp:${dockerTag}"
+						
+					}
+					sh """
+                                        docker push azkabegh/teamapp:latest
+				        docker push azkabegh/teamweb:${dockerTag} && docker push azkabegh/teamweb:latest
+				        docker push azkabegh/teamdb:${dockerTag} && docker push azkabegh/teamdb:latest
+                                        """
 			}
 		}
+	}
 		
 	/*	stage('Push Image to ECR') {
 			agent { label 'agent1' }
