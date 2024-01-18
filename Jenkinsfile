@@ -3,6 +3,7 @@ pipeline {
 		buildDiscarder(logRotator(numToKeepStr: '8'))
                 skipDefaultCheckout() 
                 disableConcurrentBuilds() 
+		ansiColor('xterm')
 	}
 	agent any
 	parameters {
