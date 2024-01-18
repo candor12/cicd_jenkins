@@ -139,7 +139,7 @@ pipeline {
 			steps {
 				script{ 
 					dir('ansible') {
-					sh "ansible-playbook deployment.yml -e NEXUS_ARTIFACT=${nexusArtifact} -vv" 
+					sh "ansible-playbook deployment.yml -v -e NEXUS_ARTIFACT=${nexusArtifact}" 
 					}
 				}
 			}
