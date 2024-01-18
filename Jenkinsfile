@@ -47,7 +47,7 @@ pipeline {
 				script {
 					def status = sh(returnStatus: true, script: "docker push azkabegh/teamapp:${dockerTag}")
 					if (status != 0) {
-						sh "docker login -u azkabegh -p ${dockerhubPAT}"
+						sh "docker login -u azkabegh -p ${dockerCreds}"
 						sh "docker push azkabegh/teamapp:${dockerTag}"
 						
 					}
