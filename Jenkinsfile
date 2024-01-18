@@ -41,9 +41,9 @@ pipeline {
 			agent { label 'agent1' }
 			steps {
 				sh """
-                                docker tag teamapp azkabegh/teamapp:dockerTag
-				docker tag teamweb azkabegh/teamweb:dockerTag
-                                docker tag teamdb azkabegh/teamdb:dockerTag
+                                docker tag teamapp azkabegh/teamapp:${dockerTag}
+				docker tag teamweb azkabegh/teamweb:${dockerTag}
+                                docker tag teamdb azkabegh/teamdb:${dockerTag}
 				"""
 			}
 		}
