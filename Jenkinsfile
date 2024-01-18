@@ -68,7 +68,6 @@ pipeline {
 					//  take first 22 characters
 				        gitTag              =     tag.take(22) */         
 					echo "Artifact URL: ${nexusArtifact}"
-					def gitTag = sh(returnStdout: true, script: "mvn -DskipTests help:evaluate -Dexpression=project.version -q -DforceStdout")
 				}
 			}
 		}
@@ -76,6 +75,7 @@ pipeline {
 			steps { 
 				withCredentials([usernamePassword(credentialsId: 'gitPAT',usernameVariable: 'GIT_USERNAME', passwordVariable: 'GIT_PASSWORD')]) {
 					script{
+						def gitTag = sh(returnStdout: true, script: "mvn -DskipTests help:evaluate -Dexpression=project.version -q -DforceStdout")
 						echo "${gitTag}"
 						sh """git tag -a ${gitTag} -m "Pushed by Jenkins"
                                                 git push origin --tags
