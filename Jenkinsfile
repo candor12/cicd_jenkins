@@ -10,10 +10,10 @@ pipeline {
 		branch           =       "docker-multiservices"
 		repoUrl          =       "https://github.com/candor12/cicd_jenkins.git"
 		gitCreds         =       "gitPAT"
-	        scannerHome      =       tool 'sonar4.7'
 	        ecrRepo          =       "674583976178.dkr.ecr.us-east-2.amazonaws.com/teamimagerepo"
 	        dockerImage      =       "${env.ecrRepo}:${env.BUILD_ID}" 
 		dockerTag        =       "${env.BUILD_ID}-${env.BUILD_TIMESTAMP}"
+		dockerCreds      =       "dockerhubPAT"
 	}
 	stages{
 		stage('SCM Checkout') {
