@@ -74,7 +74,7 @@ pipeline {
 				withCredentials([usernamePassword(credentialsId: 'gitPAT',usernameVariable: 'GIT_USERNAME', passwordVariable: 'GIT_PASSWORD')]) {
 					script{
 					        def pomVersion =  sh(returnStdout: true, script: "mvn -DskipTests help:evaluate -Dexpression=project.version -q -DforceStdout")
-						gitTag     =  "${pomVersion}-${tag2}"
+						gitTag         =  "${pomVersion}-${tag2}"
 						echo "${gitTag}"
 						sh """git tag -a ${gitTag} -m "Pushed by Jenkins"
                                                 git push origin --tags
@@ -138,7 +138,7 @@ pipeline {
 			steps {
 				script{ 
 					dir('ansible') {
-					sh "ansible-playbook deployment.yml -e NEXUS_ARTIFACT=$nexusArtifact" 
+					sh "ansible-playbook deployment.yml -e NEXUS_ARTIFACT=$nexusArtifact -v" 
 					}
 				}
 			}
