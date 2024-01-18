@@ -45,9 +45,9 @@ pipeline {
 			agent { label 'agent1' }
 			steps {
 				script {
-					def status = sh(returnStatus: true, script: docker push azkabegh/teamapp:${dockerTag})
+					def status = sh(returnStatus: true, script: "docker push azkabegh/teamapp:${dockerTag}")
 					if (status != 0) {
-						sh "docker login -u azkabegh -p $dockerhubPAT"
+						sh "docker login -u azkabegh -p ${dockerhubPAT}"
 						sh "docker push azkabegh/teamapp:${dockerTag}"
 						
 					}
