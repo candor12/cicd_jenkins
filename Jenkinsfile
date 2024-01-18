@@ -26,8 +26,8 @@ pipeline {
 				script { 
 					cleanWs()
 					git branch: branch, url: repoUrl
-					sh "docker-compose build"
-					sh "docker-compose images"
+					sh "docker compose build"
+					sh "docker compose images"
 				}
 			}
 		}
