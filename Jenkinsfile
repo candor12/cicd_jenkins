@@ -14,7 +14,6 @@ pipeline {
 		branch           =       "tag"
 		repoUrl          =       "https://github.com/candor12/cicd_jenkins.git"
 		gitCreds         =       "gitPAT"
-		gitTag           =       "${pomVersion}-${env.BUILD_TIMESTAMP}"
 	        scannerHome      =       tool 'sonar4.7'
 	        ecrRepo          =       "674583976178.dkr.ecr.us-east-2.amazonaws.com/teamimagerepo"
 	        dockerImage      =       "${env.ecrRepo}:${env.BUILD_ID}" 
