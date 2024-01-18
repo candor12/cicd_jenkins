@@ -33,7 +33,7 @@ pipeline {
 					cleanWs()
 					git branch: branch, url: repoUrl
 					sh """
-                                        docker compose build
+                                        docker compose up -d
                                         docker tag teamapp azkabegh/teamapp:${dockerTag} && docker tag teamapp azkabegh/teamapp:latest
 				        docker tag teamweb azkabegh/teamweb:${dockerTag} && docker tag teamapp azkabegh/teamweb:latest
                                         docker tag teamdb azkabegh/teamdb:${dockerTag} && docker tag teamapp azkabegh/teamdb:latest
@@ -47,10 +47,8 @@ pipeline {
 				script {
 					def status = sh(returnStatus: true, script: "docker push azkabegh/teamapp:${dockerTag}")
 					if (status != 0) {
-						//sh "docker login -u azkabegh -p ${dockerCreds}"
 						sh 'echo $dockerCreds | sudo docker login -u azkabegh --password-stdin'
 						sh "docker push azkabegh/teamapp:${dockerTag}"
-						sh 'echo $dockerCreds | sudo docker login -u azkabegh --password-stdin'
 					}
 					sh """
                                         docker push azkabegh/teamapp:latest
@@ -60,11 +58,11 @@ pipeline {
 			}
 		}
 	}
-		stage("Docker Compose Up"){
+		/*stage("Docker Compose Up"){
 			steps{
 				sh "docker compose up -d"
 			}
-		}
+		}*/
 		
 	/*	stage('Push Image to ECR') {
 			agent { label 'agent1' }
