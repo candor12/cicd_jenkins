@@ -20,6 +20,11 @@ pipeline {
 				git branch: branch, url: repoUrl, credentialsId: 'gitPAT'
 			}
 		}
+		stage('Build Artifact') {
+			steps {
+				sh "mvn clean package -DskipTests"
+			}
+		}
 		stage('Docker Image Build') {
 			agent { label 'agent1' }
 			steps {
