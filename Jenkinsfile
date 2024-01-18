@@ -60,6 +60,11 @@ pipeline {
 			}
 		}
 	}
+		stage("Docker Compose Up"){
+			steps{
+				sh "docker compose up -d"
+			}
+		}
 		
 	/*	stage('Push Image to ECR') {
 			agent { label 'agent1' }
