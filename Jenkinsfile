@@ -7,7 +7,7 @@ pipeline {
 	}
 	agent any
 	environment {
-		branch           =       "master"
+		branch           =       "docker-multiservices"
 		repoUrl          =       "https://github.com/candor12/cicd_jenkins.git"
 		gitCreds         =       "gitPAT"
 	        scannerHome      =       tool 'sonar4.7'
