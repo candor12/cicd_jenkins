@@ -11,7 +11,7 @@ pipeline {
 		booleanParam(name: "Scan", defaultValue: false, description: "By Pass SonarQube and Trivy Scan")
 	}
 	environment {
-		branch           =       "master"
+		branch           =       "tag"
 		repoUrl          =       "https://github.com/candor12/cicd_jenkins.git"
 		gitCreds         =       "gitPAT"
 	        scannerHome      =       tool 'sonar4.7'
@@ -62,11 +62,9 @@ pipeline {
 				script {
 					sh "mvn deploy -DskipTests -Dmaven.install.skip=true > nexus.log && cat nexus.log"
 					def artifactUrl     =     sh(returnStdout: true, script: 'tail -20 nexus.log | grep ".war" nexus.log | grep -v INFO | grep -v Uploaded')
-					//  drop first 20 characters using groovy
 				        nexusArtifact       =     artifactUrl.drop(20)    
-                                        def tag             =     nexusArtifact.drop(94)
-					//  take first 22 characters
-				        gitTag              =     tag.take(22)          
+                                        def tag1            =     nexusArtifact.drop(99)
+				        tag2                =     tag1.take(17)         
 					echo "Artifact URL: ${nexusArtifact}"
 				}
 			}
@@ -75,8 +73,10 @@ pipeline {
 			steps { 
 				withCredentials([usernamePassword(credentialsId: 'gitPAT',usernameVariable: 'GIT_USERNAME', passwordVariable: 'GIT_PASSWORD')]) {
 					script{
-						echo "$gitTag"
-						sh """git tag -a $gitTag -m "Pushed by Jenkins"
+					        def pomVersion =  sh(returnStdout: true, script: "mvn -DskipTests help:evaluate -Dexpression=project.version -q -DforceStdout")
+						gitTag     =  "${pomVersion}-${tag2}"
+						echo "${gitTag}"
+						sh """git tag -a ${gitTag} -m "Pushed by Jenkins"
                                                 git push origin --tags
 				                """
 					}
