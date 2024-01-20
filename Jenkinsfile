@@ -65,7 +65,7 @@ pipeline {
 		}
 		stage('Push Tag to Repository') {
 			steps { 
-				withCredentials([usernamePassword(credentialsId: 'gitPAT',usernameVariable: 'gitPAT_USERNAME', passwordVariable: 'gitPAT_PASSWORD')]) {
+				withCredentials([usernamePassword(credentialsId: 'gitPAT',usernameVariable: 'gitPAT_USR', passwordVariable: 'gitPAT_PSW')]) {
 					script{
 					        def pomVersion =  sh(returnStdout: true, script: "mvn -DskipTests help:evaluate -Dexpression=project.version -q -DforceStdout")
 						gitTag         =  "${pomVersion}-${tag2}"
