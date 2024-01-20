@@ -71,6 +71,7 @@ pipeline {
 						gitTag         =  "${pomVersion}-${tag2}"
 						echo "${gitTag}"
 						sh """git tag -a ${gitTag} -m "Pushed by Jenkins"
+                                                git config --global credential.username $gitPAT_USR
                                                 git push $repoUrl --tags
 				                """
 					}
