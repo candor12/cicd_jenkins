@@ -15,7 +15,7 @@ pipeline {
 		branch           =       "master"
 		repoUrl          =       "https://github.com/candor12/cicd_jenkins.git"
 		gitCreds         =       "gitPAT"
-	        scannerHome      =       tool 'sonar4.7'
+	        //scannerHome      =       tool 'sonar4.7'
 	        ecrRepo          =       "674583976178.dkr.ecr.us-east-2.amazonaws.com/teamimagerepo"
 	        dockerImage      =       "${env.ecrRepo}:${env.BUILD_ID}" 
 	}
@@ -35,22 +35,16 @@ pipeline {
 			tools { jdk "jdk-11" }
 			steps {
 				script { 
-					withSonarQubeEnv('sonar') {
+					withSonarQubeEnv('sonardocker') {
 						echo "Stage: SonarQube Scan"
-						sh '''${scannerHome}/bin/sonar-scanner -Dsonar.projectKey=jenkins \
-                                                -Dsonar.projectName=tjenkins \
-                                                -Dsonar.projectVersion=1.0 \
-                                                -Dsonar.sources=src/ \
-                                                -Dsonar.java.binaries=target/test-classes/com/visualpathit/account/controllerTest/ \
-                                                -Dsonar.junit.reportsPath=target/surefire-reports/ \
-                                                -Dsonar.jacoco.reportsPath=target/jacoco.exec \
-                                                -Dsonar.java.checkstyle.reportPaths=target/checkstyle-result.xml'''
+						sh "mvn clean verify sonar:sonar -Dsonar.projectKey=jenkins -Dsonar.projectName='jenkins' -DskipTests -Dmaven.install.skip=true"
 					}
 					echo "Waiting for Quality Gate"
 					timeout(time: 5, unit: 'MINUTES') {
-						def qualitygate = waitForQualityGate(webhookSecretId: 'sqwebhook')
+						def qualitygate    =   waitForQualityGate(webhookSecretId: 'sonarhook')
 						if (qualitygate.status != "OK") { 
 							catchError(buildResult: 'UNSTABLE', stageResult: 'FAILURE') { 
+								echo "Status of Quality Gate: $qualitygate.status"
 								sh "exit 1"  
 							}
 						}
