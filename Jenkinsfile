@@ -32,7 +32,6 @@ pipeline {
 		}
 		stage('SonarQube Scan') {
 			when { not { expression { return params.Scan  } } }
-			//tools { jdk "jdk-11" }
 			steps {
 				script { 
 					withSonarQubeEnv('sonar') {
@@ -69,10 +68,9 @@ pipeline {
 					script{
 					        def pomVersion =  sh(returnStdout: true, script: "mvn -DskipTests help:evaluate -Dexpression=project.version -q -DforceStdout")
 						gitTag         =  "${pomVersion}-${tag2}"
-						echo '${gitTag}'
-						sh '''git tag -a ${gitTag} -m "Pushed by Jenkins"
-                                                git push $repoUrl --tags
-				                '''
+						echo "${gitTag}"
+						sh "git tag -a ${gitTag} -m "Pushed by Jenkins""
+                                                sh 'git push https://${git_USR}:${git_PSW}@github.com/candor12/cicd_jenkins.git --tags'
 					}
 				}
 			}
