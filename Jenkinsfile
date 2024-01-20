@@ -54,7 +54,8 @@ pipeline {
 		stage('Publish Artifact to Nexus') {
 			steps {
 				script {
-					sh "mvn deploy -DskipTests -Dmaven.install.skip=true > nexus.log && cat nexus.log"
+					sh "mvn deploy -DskipTests -Dmaven.install.skip=true | tee nexus.log"
+					// > nexus.log && cat nexus.log"
 					def artifactUrl     =     sh(returnStdout: true, script: 'tail -20 nexus.log | grep ".war" nexus.log | grep -v INFO | grep -v Uploaded')
 				        nexusArtifact       =     artifactUrl.drop(20)    
                                         def tag1            =     nexusArtifact.drop(99)
