@@ -32,13 +32,11 @@ pipeline {
 		}
 		stage('SonarQube Scan') {
 			when { not { expression { return params.Scan  } } }
-			tools { jdk "jdk-11" }
 			steps {
 				script { 
 					withSonarQubeEnv('sonar') {
-						echo "Stage: SonarQube Scan"
-						sh '''${scannerHome}/bin/sonar-scanner -Dsonar.projectKey=jenkins \
-                                                -Dsonar.projectName=tjenkins \
+						sh '''${scannerHome}/bin/sonar-scanner -Dsonar.projectKey=jenkins1 \
+                                                -Dsonar.projectName=jenkins1 \
                                                 -Dsonar.projectVersion=1.0 \
                                                 -Dsonar.sources=src/ \
                                                 -Dsonar.java.binaries=target/test-classes/com/visualpathit/account/controllerTest/ \
@@ -48,7 +46,7 @@ pipeline {
 					}
 					echo "Waiting for Quality Gate"
 					timeout(time: 5, unit: 'MINUTES') {
-						def qualitygate = waitForQualityGate(webhookSecretId: 'sqwebhook')
+						def qualitygate = waitForQualityGate(webhookSecretId: 'sonarhook')
 						if (qualitygate.status != "OK") { 
 							catchError(buildResult: 'UNSTABLE', stageResult: 'FAILURE') { 
 								sh "exit 1"  
@@ -61,7 +59,7 @@ pipeline {
 		stage('Publish Artifact to Nexus') {
 			steps {
 				script {
-					sh "mvn deploy -DskipTests -Dmaven.install.skip=true > nexus.log && cat nexus.log"
+					sh "mvn deploy -DskipTests -Dmaven.install.skip=true | tee nexus.log"
 					def artifactUrl     =     sh(returnStdout: true, script: 'tail -20 nexus.log | grep ".war" nexus.log | grep -v INFO | grep -v Uploaded')
 				        nexusArtifact       =     artifactUrl.drop(20)    
                                         def tag1            =     nexusArtifact.drop(99)
@@ -76,8 +74,7 @@ pipeline {
 					script{
 					        def pomVersion =  sh(returnStdout: true, script: "mvn -DskipTests help:evaluate -Dexpression=project.version -q -DforceStdout")
 						gitTag         =  "${pomVersion}-${tag2}"
-						echo "${gitTag}"
-						sh """git tag -a ${gitTag} -m "Pushed by Jenkins"
+						sh """git tag -a ${gitTag} -m 'Pushed by Jenkins'
                                                 git push origin --tags
 				                """
 					}
