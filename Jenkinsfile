@@ -32,12 +32,12 @@ pipeline {
 		}
 		stage('SonarQube Scan') {
 			when { not { expression { return params.Scan  } } }
-			tools { jdk "jdk-11" }
+			//tools { jdk "jdk-11" }
 			steps {
 				script { 
 					withSonarQubeEnv('sonardocker') {
 						echo "Stage: SonarQube Scan"
-						sh "mvn clean verify sonar:sonar -Dsonar.projectKey=jenkins -Dsonar.projectName='jenkins' -DskipTests -Dmaven.install.skip=true"
+						sh "mvn verify sonar:sonar -Dsonar.projectKey=jenkins -Dsonar.projectName='jenkins' -DskipTests -Dmaven.install.skip=true"
 					}
 					echo "Waiting for Quality Gate"
 					timeout(time: 5, unit: 'MINUTES') {
