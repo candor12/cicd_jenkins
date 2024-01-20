@@ -2,9 +2,9 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.team.project</groupId>
-	<artifactId>tmart</artifactId>
+	<artifactId>hello</artifactId>
 	<packaging>war</packaging>
-	<version>v8.1-SNAPSHOT</version>
+	<version>v1.1</version>
 	<name>Team Project</name>
 	<url>http://maven.apache.org</url>
 	<properties>
