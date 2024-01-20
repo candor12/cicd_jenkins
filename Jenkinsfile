@@ -55,7 +55,6 @@ pipeline {
 			steps {
 				script {
 					sh "mvn deploy -DskipTests -Dmaven.install.skip=true | tee nexus.log"
-					// > nexus.log && cat nexus.log"
 					def artifactUrl     =     sh(returnStdout: true, script: 'tail -20 nexus.log | grep ".war" nexus.log | grep -v INFO | grep -v Uploaded')
 				        nexusArtifact       =     artifactUrl.drop(20)    
                                         def tag1            =     nexusArtifact.drop(99)
@@ -66,7 +65,7 @@ pipeline {
 		}
 		stage('Push Tag to Repository') {
 			steps { 
-				withCredentials([usernamePassword(credentialsId: 'gitPAT',usernameVariable: 'GIT_USERNAME', passwordVariable: 'GIT_PASSWORD')]) {
+				withCredentials([usernamePassword(credentialsId: 'gitPAT',usernameVariable: 'gitPAT_USERNAME', passwordVariable: 'gitPAT_PASSWORD')]) {
 					script{
 					        def pomVersion =  sh(returnStdout: true, script: "mvn -DskipTests help:evaluate -Dexpression=project.version -q -DforceStdout")
 						gitTag         =  "${pomVersion}-${tag2}"
