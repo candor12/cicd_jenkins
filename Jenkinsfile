@@ -65,13 +65,14 @@ pipeline {
 		}
 		stage('Push Tag to Repository') {
 			steps { 
-				withCredentials([usernamePassword(credentialsId: 'gitPAT',usernameVariable: 'gitPAT_USR', passwordVariable: 'gitPAT_PSW')]) {
+				withCredentials([usernamePassword(credentialsId: 'gitPAT',usernameVariable: 'git_USR', passwordVariable: 'git_PSW')]) {
 					script{
 					        def pomVersion =  sh(returnStdout: true, script: "mvn -DskipTests help:evaluate -Dexpression=project.version -q -DforceStdout")
 						gitTag         =  "${pomVersion}-${tag2}"
 						echo "${gitTag}"
 						sh """git tag -a ${gitTag} -m "Pushed by Jenkins"
-                                                git config --global credential.username $gitPAT_USR
+                                                git config --global credential.username $git_USR
+						git config --global credential.helper '!f() { echo password=$git_PSW; }; f'
                                                 git push $repoUrl --tags
 				                """
 					}
