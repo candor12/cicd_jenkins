@@ -36,7 +36,7 @@ pipeline {
 			steps {
 				script { 
 					withSonarQubeEnv('sonar') {
-						sh "mvn verify sonar:sonar -Dsonar.projectKey=jenkins -Dsonar.projectName='jenkins' -DskipTests"
+						sh "mvn verify sonar:sonar -Dsonar.projectKey=jenkins1 -Dsonar.projectName='jenkins1' -DskipTests"
 					}
 					echo "Waiting for Quality Gate"
 					timeout(time: 5, unit: 'MINUTES') {
