@@ -33,7 +33,7 @@ pipeline {
 					cleanWs()
 					git branch: branch, url: repoUrl
 					sh """
-                                        docker compose up -d
+                                        docker compose build docker-compose.yml
                                         docker tag teamapp azkabegh/teamapp:${dockerTag} && docker tag teamapp azkabegh/teamapp:latest
 				        docker tag teamweb azkabegh/teamweb:${dockerTag} && docker tag teamapp azkabegh/teamweb:latest
                                         docker tag teamdb azkabegh/teamdb:${dockerTag} && docker tag teamapp azkabegh/teamdb:latest
