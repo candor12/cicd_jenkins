@@ -30,6 +30,16 @@ pipeline {
 				sh "mvn clean package -DskipTests"
 			}
 		}
+		stage('JUnit Test'){
+			steps {
+				sh "mvn test"
+			}
+			post {
+				always {
+					junit(testResults: '**/surefire-reports/*.xml', allowEmptyResults : true)
+				}
+			}
+		}
 		stage('SonarQube Scan') {
 			when { not { expression { return params.Scan  } } }
 			steps {
