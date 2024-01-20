@@ -35,9 +35,8 @@ pipeline {
 			//tools { jdk "jdk-11" }
 			steps {
 				script { 
-					withSonarQubeEnv('sonardocker') {
-						echo "Stage: SonarQube Scan"
-						sh "mvn verify sonar:sonar -Dsonar.projectKey=jenkins -Dsonar.projectName='jenkins' -DskipTests -Dmaven.install.skip=true"
+					withSonarQubeEnv('sonar') {
+						sh "mvn verify sonar:sonar -Dsonar.projectKey=jenkins -Dsonar.projectName='jenkins' -DskipTests"
 					}
 					echo "Waiting for Quality Gate"
 					timeout(time: 5, unit: 'MINUTES') {
