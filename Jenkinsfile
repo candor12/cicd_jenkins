@@ -71,7 +71,7 @@ pipeline {
 						gitTag         =  "${pomVersion}-${tag2}"
 						echo "${gitTag}"
 						sh """git tag -a ${gitTag} -m "Pushed by Jenkins"
-                                                git push origin --tags
+                                                git push $repoUrl --tags
 				                """
 					}
 				}
