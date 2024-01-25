@@ -30,9 +30,8 @@ pipeline {
 			}
 		}
 		stage('JUnit Test'){
-			tools {
-				jdk "jdk-11"
-			}
+			//jdk-17 fails this stage.
+			tools { jdk "jdk-11" }
 			steps {
 				sh "mvn test"
 			}
