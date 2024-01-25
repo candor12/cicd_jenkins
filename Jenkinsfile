@@ -98,15 +98,15 @@ pipeline {
 					def toScan = sh(returnStdout: true, script: """docker images | grep "$ecrRepo" | grep latest | awk '{print \$3}' """)
 					//above command so that grype doesn't pull the latest image from repo. It should scan the local image
 					echo "$toScan"
-					//sh "grype ${toScan} --fail-on critical -o template -t ~/jenkins/grype/html.tmpl > ./grype.html"
+					sh "grype ${toScan} --fail-on critical -o template -t ~/jenkins/grype/html.tmpl > ./grype.html"
 				}
+			}
 			post { always { archiveArtifacts artifacts: "grype.html", fingerprint: true
 				                     publishHTML target : [allowMissing: true, alwaysLinkToLastBuild: true, keepAll: true,
 									   reportDir: './', reportFiles: 'grype.html', reportName: 'Grype Scan', reportTitles: 'Grype Scan']
 				      }
 			     }
 			}
-		}
 		stage('Push Image to ECR') {
 			agent { label 'agent1' }
 			steps {
