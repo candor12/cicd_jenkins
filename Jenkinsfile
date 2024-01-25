@@ -69,12 +69,12 @@ pipeline {
 		stage('Publish Artifact to JFrog') {
 			steps {
 				script {
-					sh "mvn deploy -DskipTests -Dmaven.install.skip=true | tee nexus.log"
-					def artifactUrl     =     sh(returnStdout: true, script: 'tail -20 nexus.log | grep ".war" nexus.log | grep -v INFO | grep -v Uploaded')
-				        nexusArtifact       =     artifactUrl.drop(20)    
-                                        def tag1            =     nexusArtifact.drop(98)
+					sh "mvn deploy -DskipTests -Dmaven.install.skip=true | tee jfrog.log"
+					def artifactUrl     =     sh(returnStdout: true, script: 'tail -20 jfrog.log | grep ".war" jfrog.log | grep -v INFO | grep -v Uploaded')
+				        jfrogArtifact       =     artifactUrl.drop(20)    
+                                        def tag1            =     jfrogArtifact.drop(98)
 				        tag2                =     tag1.take(18)         
-					echo "Artifact URL: ${nexusArtifact}"
+					echo "Artifact URL: ${jfrogArtifact}"
 				}
 			}
 		}
@@ -84,7 +84,7 @@ pipeline {
 					script{
 					        def pomVersion =  sh(returnStdout: true, script: "mvn -DskipTests help:evaluate -Dexpression=project.version -q -DforceStdout")
 						gitTag         =  "${pomVersion}${tag2}"
-						sh """git tag -a ${gitTag} -m 'Pushed by Jenkins'
+						sh """git tag ${gitTag}
                                                 git push origin --tags
 				                """
 					}
