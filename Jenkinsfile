@@ -17,7 +17,7 @@ pipeline {
 		gitCreds         =       "gitPAT"
 	        scannerHome      =       tool 'sonartool'
 	        ecrRepo          =       "674583976178.dkr.ecr.us-east-2.amazonaws.com/teamimagerepo"
-	        dockerImage      =       "${env.ecrRepo}:${env.BUILD_ID}" 
+	        dockerImage      =       "${env.ecrRepo}:${env.BUILD_ID}-${env.BUILD_TIMESTAMP}" 
 	}
 	stages{
 		stage('SCM Checkout') {
