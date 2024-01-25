@@ -7,7 +7,7 @@ pipeline {
 	}
 	agent any
 	parameters {
-		booleanParam(name: "EksDeploy", defaultValue: false, description: "Deploy the Build to EKS")
+		booleanParam(name: "EksDeploy", defaultValue: false, description: "Deploy the Build to EKS Cluster")
 		booleanParam(name: "Scan", defaultValue: false, description: "By Pass SonarQube and Grype Scan")
 	}
 	environment {
@@ -94,16 +94,12 @@ pipeline {
 			when { not { expression { return params.Scan  } } }
 			steps {
 				script {
-					//escape groovy variable interpolation
-					def toScan = sh(returnStdout: true, script: """docker images | grep "$ecrRepo" | grep latest | awk '{print \$3}' """)
-					//above command so that grype doesn't pull the latest image from repo. It should scan the local image
-					echo "$toScan"
-					sh """grype ${dockerImage} -o template -t ~/jenkins/grype/html.tmpl > ./grype.html"""
+					sh "grype ${dockerImage} -o template -t ~/jenkins/grype/html.tmpl > ./grype.html"
 				}
 			}
 			post { always { archiveArtifacts artifacts: "grype.html", fingerprint: true
 				                     publishHTML target : [allowMissing: true, alwaysLinkToLastBuild: true, keepAll: true,
-									   reportDir: './', reportFiles: 'grype.html', reportName: 'Grype Scan', reportTitles: 'Grype Scan']
+									   reportDir: './', reportFiles: 'grype.html', reportName: 'Grype Scan Report', reportTitles: 'Grype Scan']
 				      }
 			     }
 			}
