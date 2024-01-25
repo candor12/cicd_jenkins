@@ -23,14 +23,14 @@
 	</properties>
 	<distributionManagement>
 		<repository>
-			<id>nexus</id>
-			<name>nexus-release</name>
-			<url>http://172.31.17.3:8081/repository/maven-releases</url>
+			<id>jfrog</id>
+			<name>jfrog-release</name>
+			<url>172.31.31.145:8081/artifactory/maven-releases</url>
 		</repository>
 		<snapshotRepository>
-			<id>nexus</id>
-			<name>nexus-snapshot</name>
-			<url>http://172.31.17.3:8081/repository/maven-snapshots</url>
+			<id>jfrog</id>
+			<name>jfrog-snapshot</name>
+			<url>http://172.31.31.145:8081/artifactory/maven-snapshots</url>
 		</snapshotRepository>
 	</distributionManagement> 
 	<dependencies>
