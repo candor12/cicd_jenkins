@@ -95,7 +95,7 @@ pipeline {
 			when { not { expression { return params.Scan  } } }
 			steps {
 				script {
-					toScan = sh(returnStdout: true, script: "docker images | grep "${ecrRepo}" | grep latest | awk '{ print $3 }'")
+					toScan = sh(returnStdout: true, script: "docker images | grep '${ecrRepo}' | grep latest | awk '{ print $3 }'")
 					//above command so that grype doesn't pull the latest image from repo. It should scan the local image
 					sh "grype ${toScan} --fail-on critical -o template -t ~/jenkins/grype/html.tmpl > ./grype.html"
 				}
