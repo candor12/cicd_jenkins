@@ -66,7 +66,7 @@ pipeline {
 				}
 			}
 		} 
-		stage('Publish Artifact to Nexus') {
+		stage('Publish Artifact to JFrog') {
 			steps {
 				script {
 					sh "mvn deploy -DskipTests -Dmaven.install.skip=true | tee nexus.log"
