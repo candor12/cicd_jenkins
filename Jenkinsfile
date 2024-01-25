@@ -90,18 +90,18 @@ pipeline {
 				}
 			}
 		}
-		stage ('Grype Scan') {
+		stage ('Grype Image Scan') {
 			agent { label 'agent1' }
 			when { not { expression { return params.Scan  } } }
 			steps {
 				script {
-					 sh 'curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/html.tpl > ./html.tpl'
-				         sh 'trivy image --skip-db-update --skip-java-db-update --cache-dir ~/trivy/ --format template --template \"@./html.tpl\" -o trivy.html --severity MEDIUM,HIGH,CRITICAL ${dockerImage}' 
+					toScan = sh(returnStdout: true, script: "docker images | grep ${ecrRepo} | grep latest | awk '{ print $3 }'")
+					//above command so that grype doesn't pull the latest image from repo. It should scan the local image
+					sh "grype ${toScan} --fail-on critical -o template -t ~/jenkins/grype/html.tmpl > ./grype.html"
 				}
-			}
-			post { always { archiveArtifacts artifacts: "trivy.html", fingerprint: true
+			post { always { archiveArtifacts artifacts: "grype.html", fingerprint: true
 				                     publishHTML target : [allowMissing: true, alwaysLinkToLastBuild: true, keepAll: true,
-									   reportDir: './', reportFiles: 'trivy.html', reportName: 'Trivy Scan', reportTitles: 'Trivy Scan']
+									   reportDir: './', reportFiles: 'grype.html', reportName: 'Grype Scan', reportTitles: 'Grype Scan']
 				      }
 			     }
 		}		
