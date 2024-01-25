@@ -94,12 +94,12 @@ pipeline {
 			when { not { expression { return params.Scan  } } }
 			steps {
 				script {
-					sh "grype ${dockerImage} -o template -t ~/jenkins/grype/html.tmpl > ./grype.html"
+					sh "grype ${dockerImage} --scope all-layers --fail-on critical -o template -t ~/jenkins/grype/html.tmpl > ./grype.html"
 				}
 			}
 			post { always { archiveArtifacts artifacts: "grype.html", fingerprint: true
 				                     publishHTML target : [allowMissing: true, alwaysLinkToLastBuild: true, keepAll: true,
-									   reportDir: './', reportFiles: 'grype.html', reportName: 'Grype Scan Report', reportTitles: 'Grype Scan']
+									   reportDir: './', reportFiles: 'grype.html', reportName: 'Grype Scan Report', reportTitles: 'Grype Scan Report']
 				      }
 			     }
 			}
