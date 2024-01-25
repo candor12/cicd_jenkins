@@ -30,7 +30,9 @@ pipeline {
 				sh "mvn clean package -DskipTests"
 			}
 		}
-		stage('JUnit Test'){
+		stage('JUnit Test') {
+			//jdk-17 fails this stage.
+			tools { jdk "jdk-11" }
 			steps {
 				sh "mvn test"
 			}
