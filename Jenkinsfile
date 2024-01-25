@@ -8,8 +8,7 @@ pipeline {
 	agent any
 	parameters {
 		booleanParam(name: "EksDeploy", defaultValue: false, description: "Deploy the Build to EKS")
-		booleanParam(name: "AnsibleDeploy", defaultValue: false, description: "Deploy the Build to Target Server using Ansible")
-		booleanParam(name: "Scan", defaultValue: false, description: "By Pass SonarQube and Trivy Scan")
+		booleanParam(name: "Scan", defaultValue: false, description: "By Pass SonarQube and Grype Scan")
 	}
 	environment {
 		branch           =       "jfrog"
@@ -71,26 +70,11 @@ pipeline {
 				script {
 					sh "mvn deploy -DskipTests -Dmaven.install.skip=true | tee jfrog.log"
 					def artifactUrl     =     sh(returnStdout: true, script: 'tail -20 jfrog.log | grep ".war" jfrog.log | grep -v INFO | grep -v Uploaded')
-				        jfrogArtifact       =     artifactUrl.drop(20)    
-                                        def tag1            =     jfrogArtifact.drop(98)
-				        tag2                =     tag1.take(18)         
-					echo "Artifact URL: ${jfrogArtifact}"
+				        jrog_Artifact       =     artifactUrl.drop(20)        
+					echo "Artifact URL: ${jfrog_Artifact}"
 				}
 			}
 		}
-		stage('Push Tag to Repository') {
-			steps { 
-				withCredentials([usernamePassword(credentialsId: 'gitPAT',usernameVariable: 'GIT_USERNAME', passwordVariable: 'GIT_PASSWORD')]) {
-					script{
-					        def pomVersion =  sh(returnStdout: true, script: "mvn -DskipTests help:evaluate -Dexpression=project.version -q -DforceStdout")
-						gitTag         =  "${pomVersion}${tag2}"
-						sh """git tag ${gitTag}
-                                                git push origin --tags
-				                """
-					}
-				}
-			}
-		} 
 		stage('Docker Image Build') {
 			agent { label 'agent1' }
 			steps {
@@ -103,7 +87,7 @@ pipeline {
 				}
 			}
 		}
-		stage ('Trivy Scan') {
+		stage ('Grype Scan') {
 			agent { label 'agent1' }
 			when { not { expression { return params.Scan  } } }
 			steps {
@@ -140,31 +124,24 @@ pipeline {
 				}
 			}
 		}
-		stage('Fetch from Nexus & Deploy using Ansible') {
-			agent { label 'agent1' }
-			when { expression { return params.AnsibleDeploy } }
-			steps {
-				script{ 
-					dir('ansible') {
-					sh "ansible-playbook deployment.yml -e NEXUS_ARTIFACT=${nexusArtifact}"
-					}
-				}
-			}
-		} 
 		stage('EKS Deployment') {
 			agent { label 'agent1' }
 			when { expression { return params.EksDeploy } }
 			steps {
 				script { 
 					dir('k8s') {
-						sh "chmod +x ./cluster.sh && ./cluster.sh" 
+						sh "./cluster.sh" 
 						sh '''kubectl apply -f ./eksdeploy.yml
-                                                kubectl get deployments && sleep 5 && kubectl get svc
+                                                sleep 6 && kubectl get all
 				                '''   
 					}
 				}
 			}
 		} 
 	} 
-	post { always { cleanWs() } }
+	post { 
+		always {
+			cleanWs() 
+		} 
+	}
 }
