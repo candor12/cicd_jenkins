@@ -72,7 +72,7 @@ pipeline {
 			steps {
 				script {
 					sh "mvn deploy -DskipTests -Dmaven.install.skip=true | tee jfrog.log"
-					def artifactUrl     =     sh(returnStdout: true, script: 'tail -20 jfrog.log | grep ".war" jfrog.log | grep -v INFO | grep -v Uploaded')
+					def artifactUrl      =     sh(returnStdout: true, script: 'tail -20 jfrog.log | grep ".war" jfrog.log | grep -v INFO | grep -v Uploaded')
 				        jfrog_Artifact       =     artifactUrl.drop(20)        
 					echo "Artifact URL: ${jfrog_Artifact}"
 				}
@@ -95,7 +95,7 @@ pipeline {
 			when { not { expression { return params.Scan  } } }
 			steps {
 				script {
-					toScan = sh(returnStdout: true, script: "docker images | grep ${ecrRepo} | grep latest | awk '{ print $3 }'")
+					toScan = sh(returnStdout: true, script: "docker images | grep "\${ecrRepo}" | grep latest | awk '{ print $3 }'")
 					//above command so that grype doesn't pull the latest image from repo. It should scan the local image
 					sh "grype ${toScan} --fail-on critical -o template -t ~/jenkins/grype/html.tmpl > ./grype.html"
 				}
