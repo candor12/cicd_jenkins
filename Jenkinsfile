@@ -30,6 +30,9 @@ pipeline {
 			}
 		}
 		stage('JUnit Test'){
+			tools {
+				jdk "jdk-11"
+			}
 			steps {
 				sh "mvn test"
 			}
